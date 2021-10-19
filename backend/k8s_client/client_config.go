@@ -74,3 +74,6 @@ var (
 		ResourceName: "users",
 	}
 )
+
+// specifies which namespace the created User will be stored
+const userStoreNS = "default"

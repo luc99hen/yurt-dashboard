@@ -5,6 +5,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -28,12 +29,13 @@ func getRESTClient(config *ClientConfig) (*rest.RESTClient, error) {
 	restConfig.APIPath = config.APIPath
 	restConfig.GroupVersion = config.GroupVersion
 	restConfig.NegotiatedSerializer = scheme.Codecs
+	restConfig.ContentType = "application/json"
 
 	return rest.RESTClientFor(restConfig)
 }
 
 // read kubeconfig string from a local file
-func GetKubeConfigString(kubeconfigPath string) string {
+func getKubeConfigString(kubeconfigPath string) string {
 	contentBytes, err := ioutil.ReadFile(kubeconfigPath)
 	if err != nil {
 		panic("read kubeconfig file failed")
@@ -43,6 +45,7 @@ func GetKubeConfigString(kubeconfigPath string) string {
 
 func doGetReq(client *rest.RESTClient, namespace, resourceType string) *rest.Request {
 	req := client.Get()
+	// namespace can be left blank
 	if namespace != "" {
 		req = req.Namespace(namespace)
 	}
@@ -50,15 +53,15 @@ func doGetReq(client *rest.RESTClient, namespace, resourceType string) *rest.Req
 		Resource(resourceType)
 }
 
-// getRaw create a resourceClient and uses it to get raw resp from k8s API
-func getRaw(kubeConfig, namespace string, resourceConfig *ResourceConfig) ([]byte, error) {
+// listRaw create a resourceClient and uses it to get raw resp from k8s API
+func listRaw(kubeConfig, namespace string, resourceConfig *ResourceConfig) ([]byte, error) {
 	rawClient := &baseClient{}
 	err := rawClient.InitClient(kubeConfig, resourceConfig)
 	if err != nil {
-		return nil, fmt.Errorf("get raw fail: %v", err)
+		return nil, fmt.Errorf("list raw fail: %v", err)
 	}
 
-	return rawClient.GetRaw(namespace)
+	return rawClient.ListRaw(namespace)
 }
 
 func getPodStatus(client *rest.RESTClient, namespace string) (status *ResourceStatus, err error) {
@@ -195,5 +198,18 @@ func getJobStatus(client *rest.RESTClient, namespace string) (status *ResourceSt
 	}
 
 	return
+}
 
+func createUser(user UserSpec) []byte {
+
+	payload := User{
+		Spec: user,
+	}
+	payload.APIVersion = "user.openyurt.io/v1alpha1"
+	payload.Kind = "User"
+	payload.Name = fmt.Sprintf("user-%s", user.Mobilephone)
+
+	res, _ := json.Marshal(payload)
+
+	return res
 }

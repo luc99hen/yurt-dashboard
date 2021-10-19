@@ -1,5 +1,7 @@
 /*
-client.go defines resourceClient used to perform actions for a specific kind of resource
+ client.go defines two types of clients
+ - baseClient used to perform general purpose actions such as Create, Read, List
+ - resourceClient used to perform actions corresponding to a specific kind of resource
 */
 
 package client
@@ -16,13 +18,12 @@ type StatusReader interface {
 }
 
 type RawReader interface {
-	GetRaw(namespace string) ([]byte, error)
+	ListRaw(namespace string) ([]byte, error)
+	GetRaw(namespace, name string) ([]byte, error)
 }
 
-type ResourceClient interface {
-	InitClient(kubeConfig string) error
-	RawReader
-	StatusReader
+type RawWriter interface {
+	CreateRaw(namespace string, body interface{}) error
 }
 
 type ResourceStatus struct {
@@ -40,6 +41,8 @@ type ResourceStatus struct {
 	// Info tell about the err msg
 	Info string
 }
+
+//// baseClient implementation
 
 // baseClient is responsible for performing actions for a specific kind of resource.
 // It is a wrapper for RESTClient in client-go
@@ -60,10 +63,57 @@ func (c *baseClient) InitClient(kubeConfig string, resourceConfig *ResourceConfi
 	return nil
 }
 
-// return raw resp body received from k8s api
-func (c *baseClient) GetRaw(namespace string) ([]byte, error) {
+// return raw list resp body received from k8s api
+func (c *baseClient) ListRaw(namespace string) ([]byte, error) {
 	return doGetReq(c.client, namespace, c.resourceName).
 		DoRaw(context.TODO())
+}
+
+// return raw obj resp body
+func (c *baseClient) GetRaw(namespace string, name string) ([]byte, error) {
+	return doGetReq(c.client, namespace, c.resourceName).Name(name).
+		DoRaw(context.TODO())
+}
+
+// create raw obj resource in k8s
+func (c *baseClient) CreateRaw(namespace string, obj interface{}) error {
+	req := c.client.Post()
+	if namespace != "" {
+		req = req.Namespace(namespace)
+	}
+	_, err := req.
+		Resource(c.resourceName).
+		Body(obj).
+		DoRaw(context.TODO())
+	return err
+}
+
+//// ResourceClient implementation
+
+type UserClient struct {
+	baseClient
+}
+
+func (c *UserClient) InitClient(kubeConfig string) (err error) {
+	return c.baseClient.InitClient(kubeConfig, &UserConfig)
+}
+
+func (c *UserClient) GetUser(name string) (user *User, err error) {
+	user = &User{}
+	err = doGetReq(c.client, userStoreNS, c.resourceName).Name(name).
+		Do(context.TODO()).
+		Into(user)
+	if err != nil {
+		return nil, fmt.Errorf("get user fail: %w", err)
+	}
+	return
+}
+
+type ResourceClient interface {
+	InitClient(kubeConfig string) error
+	RawReader
+	RawWriter
+	StatusReader
 }
 
 type PodClient struct {
