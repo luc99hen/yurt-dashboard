@@ -107,7 +107,6 @@ const ContentWithoutSider = ({ content }) => {
       style={{
         minHeight: "100vh",
         justifyContent: "space-between",
-        paddingTop: "7%",
       }}
     >
       {content}

@@ -1,4 +1,3 @@
-import arch from "../assets/architecture.png";
 import { Form, Input, Button, Checkbox, Card } from "antd";
 import { Link } from "react-router-dom";
 import {
@@ -8,6 +7,7 @@ import {
   LockOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
+import { IntroBlock } from "./Intro";
 
 const RegisterForm = ({ gotoLogin }) => {
   return (
@@ -92,17 +92,17 @@ const LoginForm = ({ gotoRegister }) => {
         onFinish={onFinish}
       >
         <Form.Item
-          name="email"
+          name="phone"
           rules={[
             {
               required: true,
-              message: "Please input your Email!",
+              message: "Please input your phone number!",
             },
           ]}
         >
           <Input
-            prefix={<MailOutlined className="site-form-item-icon" />}
-            placeholder="Email"
+            prefix={<PhoneOutlined className="site-form-item-icon" />}
+            placeholder="Phone Number"
           />
         </Form.Item>
         <Form.Item
@@ -148,38 +148,29 @@ const LoginForm = ({ gotoRegister }) => {
   );
 };
 
-// hello
-const LoginPage = () => {
-  const [pageStatus, setStatus] = useState("login");
+// the whole /login page
+export default function LoginPage() {
+  const [pageStatus, setStatus] = useState("loading");
+
+  const doRegist = () => {
+    setStatus("loading");
+    Promise.all([
+      setTimeout(() => {
+        setStatus("complete");
+      }, 12000),
+    ]);
+  };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-evenly",
-        flexWrap: "wrap",
-      }}
-    >
-      <div className="login-intro">
-        <img src={arch} alt="openyurt-arch"></img>
-        <div className="login-intro-word">
-          Extending Kubernetes to Edge
-          <a
-            style={{ display: "block", fontSize: 21 }}
-            href="https://openyurt.io/zh-cn/"
-          >
-            Learn More About OpenYurt &gt;
-          </a>
-        </div>
-      </div>
+    <div className="login">
+      <IntroBlock status={pageStatus} />
 
-      {pageStatus === "login" ? (
-        <LoginForm gotoRegister={() => setStatus("register")} />
+      {pageStatus === "loading" ||
+      pageStatus === "complete" ? null : pageStatus === "register" ? (
+        <RegisterForm gotoLogin={doRegist} />
       ) : (
-        <RegisterForm gotoLogin={() => setStatus("login")} />
+        <LoginForm gotoRegister={() => setStatus("register")} />
       )}
     </div>
   );
-};
-
-export default LoginPage;
+}
