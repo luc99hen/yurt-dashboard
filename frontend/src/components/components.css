@@ -3,7 +3,7 @@
 }
 
 .form-card {
-  min-width: 375px;
+  width: 400px;
   margin: 10% 10px;
   box-shadow: 0 8px 16px 0 rgb(0 0 0 / 5%);
   height: fit-content;
@@ -13,7 +13,8 @@
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
-  margin: 8% 6% 0;
+  margin: 2% 6% 0;
+  align-items: center;
 }
 
 .login-form-register {

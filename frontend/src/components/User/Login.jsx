@@ -1,175 +1,64 @@
-import { Form, Input, Button, Checkbox, Card } from "antd";
-import { Link } from "react-router-dom";
-import {
-  MailOutlined,
-  BankOutlined,
-  PhoneOutlined,
-  LockOutlined,
-} from "@ant-design/icons";
 import { useState } from "react";
-import { IntroBlock } from "./Intro";
-
-const RegisterForm = ({ gotoLogin }) => {
-  return (
-    <Card className="form-card">
-      <Form
-        name="normal_login"
-        initialValues={{
-          remember: true,
-        }}
-        onFinish={(vals) => console.log(vals)}
-      >
-        <Form.Item
-          name="email"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Email!",
-            },
-          ]}
-        >
-          <Input
-            prefix={<MailOutlined className="site-form-item-icon" />}
-            placeholder="Email"
-          />
-        </Form.Item>
-        <Form.Item
-          name="phone"
-          rules={[
-            {
-              required: true,
-              message: "Please input your phone number!",
-            },
-          ]}
-        >
-          <Input
-            prefix={<PhoneOutlined className="site-form-item-icon" />}
-            placeholder="Phone Number"
-          />
-        </Form.Item>
-        <Form.Item
-          name="organization"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Organization!",
-            },
-          ]}
-        >
-          <Input
-            prefix={<BankOutlined className="site-form-item-icon" />}
-            placeholder="Organization"
-          />
-        </Form.Item>
-
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="login-form-button"
-            onClick={gotoLogin}
-          >
-            Register
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
-  );
-};
-
-const LoginForm = ({ gotoRegister }) => {
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
-  };
-
-  return (
-    <Card className="form-card">
-      <Form
-        name="normal_login"
-        initialValues={{
-          remember: true,
-        }}
-        onFinish={onFinish}
-      >
-        <Form.Item
-          name="phone"
-          rules={[
-            {
-              required: true,
-              message: "Please input your phone number!",
-            },
-          ]}
-        >
-          <Input
-            prefix={<PhoneOutlined className="site-form-item-icon" />}
-            placeholder="Phone Number"
-          />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Password!",
-            },
-          ]}
-        >
-          <Input
-            prefix={<LockOutlined className="site-form-item-icon" />}
-            type="password"
-            placeholder="Password"
-          />
-        </Form.Item>
-        <Form.Item>
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Remember me</Checkbox>
-          </Form.Item>
-
-          <Button
-            type="text"
-            onClick={() => gotoRegister()}
-            className="login-form-register"
-          >
-            Register Now
-          </Button>
-        </Form.Item>
-
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="login-form-button"
-          >
-            <Link to="/clusterinfo">Log in</Link>
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
-  );
-};
+import { CompleteBlock, IntroBlock, LoadingBlock } from "./pageStatus";
+import RegisterForm from "./RegisterForm";
+import LoginForm from "./LoginForm";
+import { sendRequest } from "../../utils/request";
 
 // the whole /login page
+// pageStatus ?
+//  = loading: waiting for registering
+//  = complete: register success or fail
+//  = login: login form
+//  = register: register form
 export default function LoginPage() {
-  const [pageStatus, setStatus] = useState("loading");
+  const [pageStatus, setStatus] = useState("login");
+  const [requestRes, setRes] = useState(null);
 
-  const doRegist = () => {
+  const doRegist = (formData) => {
     setStatus("loading");
-    Promise.all([
-      setTimeout(() => {
-        setStatus("complete");
-      }, 12000),
-    ]);
+    sendRequest("/register", formData)
+      .then(
+        (res) => {
+          // success callback
+          res.rstatus = "success";
+          res.buttonFn = () => {
+            setStatus("login");
+          };
+          setRes(res);
+        },
+        (err) => {
+          // err callback
+          setRes({
+            rstatus: "error",
+            msg: err.message,
+            buttonFn: () => {
+              setStatus("register");
+            },
+          });
+        }
+      )
+      .then(() => setStatus("complete"));
   };
 
   return (
-    <div className="login">
-      <IntroBlock status={pageStatus} />
-
-      {pageStatus === "loading" ||
-      pageStatus === "complete" ? null : pageStatus === "register" ? (
-        <RegisterForm gotoLogin={doRegist} />
+    <div style={{ margin: "auto 0" }}>
+      {pageStatus === "loading" ? (
+        <LoadingBlock />
+      ) : pageStatus === "complete" ? (
+        <CompleteBlock res={requestRes} />
+      ) : pageStatus === "register" ? (
+        <div className="login">
+          <IntroBlock />
+          <RegisterForm register={doRegist} />
+        </div>
       ) : (
-        <LoginForm gotoRegister={() => setStatus("register")} />
+        <div className="login">
+          <IntroBlock />
+          <LoginForm
+            gotoRegister={() => setStatus("register")}
+            initState={requestRes}
+          />
+        </div>
       )}
     </div>
   );

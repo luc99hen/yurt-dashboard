@@ -1,4 +1,4 @@
-import { Select } from "antd";
+import { message, Select } from "antd";
 import "./cluster.css";
 import { Dashboard } from "./Dashborad";
 import { EventTable } from "./EventTable";
@@ -34,14 +34,18 @@ export default function ClusterOverview() {
       <div style={{ margin: "20px 0" }}>
         <Dashboard
           setConnStatus={(res) => {
-            if (!("status" in res)) {
-              setStatus("Ready");
-            } else {
-              setStatus("Connection Lost");
+            // if any res is in False Status
+            for (let item of res) {
+              if ("Status" in item && item.Status === false) {
+                message.error("request cluster overview has some problems!");
+                setStatus("Fail");
+                return;
+              }
             }
+            setStatus("Ready");
           }}
         />
-        <EventTable />
+        {/* <EventTable /> */}
       </div>
     </div>
   );

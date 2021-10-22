@@ -1,5 +1,6 @@
 import { getJobs } from "../../utils/request";
-import { renderDictCell, useResourceState } from "../../utils/utils";
+import { useResourceState } from "../../utils/hooks";
+import { renderDictCell } from "../../utils/utils";
 import { Status } from "../Utils/Status";
 import Workload from "./WorkloadTemplate";
 

@@ -3,7 +3,7 @@ const colorState = {
   ready: "#62CB35",
   正常: "#62CB35",
   fail: "#F74336",
-  loading: "#1A73E8",
+  loading: "#E83B27",
   running: "#62CB35",
 };
 

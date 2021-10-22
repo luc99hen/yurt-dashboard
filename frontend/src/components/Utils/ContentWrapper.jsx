@@ -1,20 +1,21 @@
 import React from "react";
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Button } from "antd";
 import { Link } from "react-router-dom";
 import logo from "../../assets/OpenYurt.png";
-import { useCacheState } from "../../utils/utils";
+import { useSessionState } from "../../utils/hooks";
 import {
   InfoCircleTwoTone,
   AppstoreTwoTone,
   GoldTwoTone,
 } from "@ant-design/icons";
+import { clearUserProfile } from "../../utils/utils";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
 const MySider = () => {
-  const [collapsed, setCollapse] = useCacheState("collapsed", false);
-  const [openKeys, setOpenKeys] = useCacheState("openKeys", [
+  const [collapsed, setCollapse] = useSessionState("collapsed", false);
+  const [openKeys, setOpenKeys] = useSessionState("openKeys", [
     "nodemanagement",
     "workload",
   ]);
@@ -71,14 +72,26 @@ const MySider = () => {
   );
 };
 
-const ContentWithSider = ({ content }) => {
+const ContentWithSider = ({ content, history }) => {
   return (
     <Layout>
       <Header className="header">
         <img src={logo} alt="logo" className="logo"></img>
-        <Link to="/login" style={{ float: "right" }}>
+        <Button
+          type="text"
+          style={{
+            float: "right",
+            color: "#1890FF",
+            marginTop: 13,
+            marginRight: 5,
+          }}
+          onClick={() => {
+            clearUserProfile();
+            history.push("/login");
+          }}
+        >
           Log Out
-        </Link>
+        </Button>
       </Header>
       <Layout>
         <MySider></MySider>
