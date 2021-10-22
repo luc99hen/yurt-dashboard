@@ -27,9 +27,7 @@ const App = () => {
             <Route
               key={index}
               path={route.path}
-              children={
-                <ContentWithSider content={<route.main />}></ContentWithSider>
-              }
+              render={({ history }) => <ContentWithSider history={history} content={<route.main />} ></ContentWithSider>}
             />
           )
         )}

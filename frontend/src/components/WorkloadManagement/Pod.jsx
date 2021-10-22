@@ -1,7 +1,8 @@
 import Workload from "./WorkloadTemplate";
 import { Status } from "../Utils/Status";
 import { getPods } from "../../utils/request";
-import { renderDictCell, useResourceState } from "../../utils/utils";
+import { renderDictCell } from "../../utils/utils";
+import { useResourceState } from "../../utils/hooks";
 
 const columns = [
   {

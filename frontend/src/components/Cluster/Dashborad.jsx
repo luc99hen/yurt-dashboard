@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sendRequest } from "../../utils/request";
+import { sendUserRequest } from "../../utils/request";
 import { PieChart, HalfPieChart } from "../Utils/PieCharts";
 import { Card } from "antd";
 
@@ -17,7 +17,7 @@ export function Dashboard({ setConnStatus }) {
   const [clusterStatus, setClusterStatus] = useState(null);
 
   useEffect(() => {
-    sendRequest("/getOverview").then((res) => {
+    sendUserRequest("/getOverview").then((res) => {
       setClusterStatus(res);
       setConnStatus(res);
     });

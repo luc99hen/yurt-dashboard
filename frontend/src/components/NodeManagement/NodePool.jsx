@@ -1,6 +1,6 @@
 import { Table } from "antd";
 import { getNodepools } from "../../utils/request";
-import { useResourceState } from "../../utils/utils";
+import { useResourceState } from "../../utils/hooks";
 import { RefreshButton } from "../Utils/RefreshButton";
 
 const columns = [

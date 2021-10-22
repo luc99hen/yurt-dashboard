@@ -1,5 +1,5 @@
 import { getStatefulSets } from "../../utils/request";
-import { useResourceState } from "../../utils/utils";
+import { useResourceState } from "../../utils/hooks";
 import Workload from "./WorkloadTemplate";
 
 export default function StatefulSet() {

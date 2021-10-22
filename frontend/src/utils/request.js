@@ -1,10 +1,10 @@
-import { baseURL, userProfile } from "../config";
+import { baseURL } from "../config";
 import { message } from "antd";
-import { toPercentagePresentation, formatTime } from "./utils";
+import { toPercentagePresentation, formatTime, getUserProfile } from "./utils";
 
 export function sendRequest(path, data) {
   return fetch(baseURL + path, {
-    body: JSON.stringify({ ...data, ...userProfile.spec }),
+    body: JSON.stringify({ ...data }),
     headers: {
       "content-type": "application/json",
     },
@@ -12,24 +12,33 @@ export function sendRequest(path, data) {
   })
     .then((res) => res.json())
     .then((res) => {
-      if ("status" in res) {
+      if ("status" in res && res.status === false) {
         // throw failed resp error
         throw new Error(res["msg"]);
       }
       return res;
     })
-    .catch((err) => {
-      // catch request error
-      message.error(err.message);
-    })
-    .then((res) => {
-      if (res && !("status" in res)) {
-        return res;
-      } else {
-        // return empty array to keep interface consistency
-        return { items: [], filter: () => [], status: "failed" };
-      }
-    });
+
+}
+
+// send request as a use (add user token in request body)
+export function sendUserRequest(path, data) {
+  const userProfile = getUserProfile();
+  if (!userProfile) {
+    return
+  }
+  return sendRequest(path, { ...data, ...userProfile.spec }).catch((err) => {
+    // catch request error
+    message.error(err.message);
+    console.log(err.message)
+  }).then((res) => {
+    if (res && !("status" in res && res.status === false)) {
+      return res;
+    } else {
+      // return empty obj to keep interface consistency
+      return { items: [], filter: () => [], status: "error" };
+    }
+  });
 }
 
 // transform common attributes of an object for presentation
@@ -54,7 +63,7 @@ export function getNodepools(paras) {
     };
   };
 
-  return sendRequest("/getNodepools", paras).then((nps) =>
+  return sendUserRequest("/getNodepools", paras).then((nps) =>
     nps.items.map(trasnform)
   );
 }
@@ -93,11 +102,11 @@ export function getNodes(paras) {
       status: {
         CPU: toPercentagePresentation(
           parseFloat(rawNode.status.allocatable.cpu) /
-            parseFloat(rawNode.status.capacity.cpu)
+          parseFloat(rawNode.status.capacity.cpu)
         ),
         Mem: toPercentagePresentation(
           parseFloat(rawNode.status.allocatable.memory) /
-            parseFloat(rawNode.status.capacity.memory)
+          parseFloat(rawNode.status.capacity.memory)
         ),
       },
       version: {
@@ -108,7 +117,7 @@ export function getNodes(paras) {
     };
   };
 
-  return sendRequest("/getNodes", paras).then((nodes) =>
+  return sendUserRequest("/getNodes", paras).then((nodes) =>
     nodes.items.map(transform)
   );
 }
@@ -122,13 +131,13 @@ const transformWorkload = (workload, i) => ({
 });
 
 export function getDeployments(paras) {
-  return sendRequest("/getDeployments", paras).then((dps) =>
+  return sendUserRequest("/getDeployments", paras).then((dps) =>
     dps.items.map(transformWorkload)
   );
 }
 
 export function getStatefulSets(paras) {
-  return sendRequest("/getStatefulsets", paras).then((ss) =>
+  return sendUserRequest("/getStatefulsets", paras).then((ss) =>
     ss.items.map(transformWorkload)
   );
 }
@@ -147,7 +156,7 @@ export function getJobs(paras) {
     };
   };
 
-  return sendRequest("/getJobs", paras).then((jobs) =>
+  return sendUserRequest("/getJobs", paras).then((jobs) =>
     jobs.items.map(transform)
   );
 }
@@ -168,7 +177,7 @@ export function getPods(paras) {
     podStatus: pod.status.phase,
   });
 
-  return sendRequest("/getPods", paras).then((pods) =>
+  return sendUserRequest("/getPods", paras).then((pods) =>
     pods.items.map(transform)
   );
 }

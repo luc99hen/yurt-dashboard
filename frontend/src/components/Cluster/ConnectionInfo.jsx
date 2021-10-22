@@ -1,8 +1,10 @@
 import { Tabs } from "antd";
 import Certificate from "./Certificate";
-import { userProfile } from "../../config";
+import { getUserProfile } from "../../utils/utils";
 
 export default function ConnectionInfo() {
+  let userProfile = getUserProfile();
+
   return (
     <div>
       <div>通过 kubectl 连接 Kubernetes 集群</div>
@@ -18,7 +20,9 @@ export default function ConnectionInfo() {
           }}
         >
           <Tabs.TabPane tab="公网访问" key="1">
-            <Certificate content={userProfile.spec.kubeConfig}></Certificate>
+            <Certificate
+              content={userProfile && userProfile.spec.kubeConfig}
+            ></Certificate>
           </Tabs.TabPane>
         </Tabs>
       </div>
