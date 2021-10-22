@@ -7,7 +7,7 @@ import "fmt"
 
 // get admin kubeconfg
 func GetAdminKubeConfig() string {
-	return getKubeConfigString("./kubeconfig.conf")
+	return kubeConfig
 }
 
 // get all Pods from a namespace
@@ -86,19 +86,19 @@ func GetClusterOverview(kubeConfig, namespace string) (res []*ResourceStatus, er
 }
 
 // get user by username
-func GetUser(kubeConfig, name string) (*User, error) {
+func GetUser(kubeConfig, phoneNumber string) (*User, error) {
 	userClient := &UserClient{}
 	err := userClient.InitClient(kubeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("get user: init client fail: %w", err)
 	}
 
-	user, err := userClient.GetUser(name)
+	user, err := userClient.GetUser(fmt.Sprintf("user-%s", phoneNumber))
 	return user, err
 }
 
 // Create User Obj
-func CreateUser(kubeConfig string, user UserSpec) (err error) {
+func CreateUser(kubeConfig string, user *UserSpec) (err error) {
 	userClient := &UserClient{}
 	err = userClient.InitClient(kubeConfig)
 	if err != nil {
