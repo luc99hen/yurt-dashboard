@@ -200,10 +200,10 @@ func getJobStatus(client *rest.RESTClient, namespace string) (status *ResourceSt
 	return
 }
 
-func createUser(user UserSpec) []byte {
+func createUser(user *UserSpec) []byte {
 
 	payload := User{
-		Spec: user,
+		Spec: *user,
 	}
 	payload.APIVersion = "user.openyurt.io/v1alpha1"
 	payload.Kind = "User"

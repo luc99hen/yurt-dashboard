@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 	client "yurt_console_backend/k8s_client"
 
 	"github.com/gin-gonic/gin"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func getNodeHandler(c *gin.Context) {
@@ -52,7 +54,7 @@ func getClusterOverviewHandler(c *gin.Context) {
 
 func loginHandler(c *gin.Context) {
 
-	submitUser := struct {
+	submitUser := &struct {
 		MobilePhone string
 		Token       string
 	}{}
@@ -63,11 +65,13 @@ func loginHandler(c *gin.Context) {
 	fetchUser, err := client.GetUser(adminKubeConfig, submitUser.MobilePhone)
 	if err != nil { // fetch user failed
 		JSONErr(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	// testify if user token is valid
+	// test if user token is valid
 	if strings.TrimSpace(fetchUser.Spec.Token) != strings.TrimSpace(submitUser.Token) {
-		JSONErr(c, http.StatusBadRequest, "phoneNumber or token is invalid")
+		JSONErr(c, http.StatusBadRequest, "username or password is invalid")
+		return
 	}
 
 	c.JSON(http.StatusOK, fetchUser)
@@ -75,23 +79,38 @@ func loginHandler(c *gin.Context) {
 
 func registerHandler(c *gin.Context) {
 
-	userProfile := client.UserSpec{}
+	userProfile := &client.UserSpec{}
 	if err := c.BindJSON(userProfile); err != nil {
+		JSONErr(c, http.StatusBadRequest, fmt.Sprintf("register: parse form data fail: %v", err))
 		return // parse failed, then abort
 	}
 
 	// create user obj
 	err := client.CreateUser(adminKubeConfig, userProfile)
 	if err != nil {
-		JSONErr(c, http.StatusBadRequest, fmt.Sprintf("register: create user fail: %v", err))
+		JSONErr(c, http.StatusInternalServerError, fmt.Sprintf("register: create user fail: %v", err))
+		return
 	}
 
-	// get created user
-	createdUser, err := client.GetUser(adminKubeConfig, userProfile.Mobilephone)
-	if err != nil {
-		JSONErr(c, http.StatusBadRequest, fmt.Sprintf("register: get created user fail: %v", err))
+	// get created user and check its status
+	// return only when User resources is all prepared (User.Status.EffectiveTime is not null)
+	maxRetry := 30
+	for i := 1; i <= maxRetry; i++ {
+		createdUser, err := client.GetUser(adminKubeConfig, userProfile.Mobilephone)
+		if err != nil {
+			JSONErr(c, http.StatusInternalServerError, fmt.Sprintf("register: get created user fail: %v", err))
+			return
+		}
+
+		// all resources has been created, return success
+		if createdUser.Status.EffectiveTime != (v1.Time{}) {
+			c.JSON(http.StatusOK, createdUser)
+			return
+		}
+
+		time.Sleep(time.Duration(2) * time.Second)
 	}
 
-	c.JSON(http.StatusOK, createdUser)
+	JSONErr(c, http.StatusInternalServerError, "register: get created user fail: exceed maxretry")
 
 }

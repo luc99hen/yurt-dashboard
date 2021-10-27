@@ -7,8 +7,6 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-var kubeConfig = GetKubeConfigString("./kubeconfig.conf")
-
 func assertNoErr(err error, t testing.TB) {
 	t.Helper()
 	if err != nil {
@@ -57,11 +55,22 @@ func TestGetOverview(t *testing.T) {
 
 func TestUser(t *testing.T) {
 
+	t.Run("post user format not allowed: invalid phonenumber", func(t *testing.T) {
+
+		err := CreateUser(kubeConfig, &UserSpec{
+			Email:        "132@qq.com",
+			Mobilephone:  "+1",
+			Organization: "Tongji",
+		})
+
+		assertErrCode(err, 422, t)
+	})
+
 	t.Run("post existing user", func(t *testing.T) {
 
-		err := CreateUser(kubeConfig, UserSpec{
-			Email:        "1",
-			Mobilephone:  "2",
+		err := CreateUser(kubeConfig, &UserSpec{
+			Email:        "132@qq.com",
+			Mobilephone:  "1",
 			Organization: "openyurt",
 		})
 
@@ -69,12 +78,12 @@ func TestUser(t *testing.T) {
 	})
 
 	t.Run("get user", func(t *testing.T) {
-		_, err := GetUser(kubeConfig, "test")
+		_, err := GetUser(kubeConfig, "18321778186")
 		assertNoErr(err, t)
 	})
 
 	t.Run("get non-exist user", func(t *testing.T) {
-		_, err := GetUser(kubeConfig, "test-non")
+		_, err := GetUser(kubeConfig, "non")
 		assertErrCode(err, 404, t)
 	})
 }

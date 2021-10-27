@@ -77,3 +77,5 @@ var (
 
 // specifies which namespace the created User will be stored
 const userStoreNS = "default"
+
+var kubeConfig = getKubeConfigString("../kubeconfig.conf")
