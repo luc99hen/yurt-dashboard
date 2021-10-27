@@ -1,7 +1,6 @@
 // customized hooks
 import { useCallback, useEffect, useState } from "react";
 
-
 // use sessionStorage to cache state
 export function useSessionState(cache_key, default_val) {
     return useCacheState(cache_key, default_val, sessionStorage)

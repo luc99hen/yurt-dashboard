@@ -25,7 +25,8 @@ export function sendRequest(path, data) {
 export function sendUserRequest(path, data) {
   const userProfile = getUserProfile();
   if (!userProfile) {
-    return
+    // if userProfile is empty, redirect to login page
+    window.location.replace("/login");
   }
   return sendRequest(path, { ...data, ...userProfile.spec }).catch((err) => {
     // catch request error
@@ -152,7 +153,7 @@ export function getJobs(paras) {
         failed: job.status.failed,
         active: job.status.active,
       },
-      jobStatus: job.status.failed == 0 ? "正常" : "异常",
+      jobStatus: job.status.failed === 0 ? "正常" : "异常",
     };
   };
 

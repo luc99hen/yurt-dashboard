@@ -21,7 +21,7 @@ export function Dashboard({ setConnStatus }) {
       setClusterStatus(res);
       setConnStatus(res);
     });
-  }, []);
+  }, [setConnStatus]);
 
   return (
     <div>

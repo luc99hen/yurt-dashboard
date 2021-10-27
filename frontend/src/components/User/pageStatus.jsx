@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { LoadingOutlined, BulbOutlined } from "@ant-design/icons";
 import { Result, Button, Typography } from "antd";
 
-const { Paragraph, Text } = Typography;
+const { Paragraph, Text, Link } = Typography;
 
 const introList = [
   {
@@ -118,9 +118,26 @@ export function CompleteBlock({ res }) {
       buttonTxt: "Go to Login",
       tipTitle: "在进入Web控制台前，请先阅读以下说明:",
       tips: [
-        "您的试用平台账号默认有效期为7天，7天之后系统会自动注销您的账号，并清空相关资源",
-        `您的试用平台账号为您注册时填写的手机号📱${res.spec.mobilephone}，密码🔑 ${res.spec.token}，请妥善保管`,
-        "若您还有其他问题可通过邮箱 xxxx@alibaba.com 联系管理员🕵️‍♂️",
+        <span>
+          您的试用平台账号默认有效期为7天，7天之后系统会自动注销您的账号，并清空相关资源
+        </span>,
+        <span>
+          您的试用平台账号为您注册时填写的手机号📱
+          <Text mark>{res.spec.mobilephone} </Text>，密码🔑{" "}
+          <Text mark>{res.spec.token}</Text>
+          ，请妥善保管
+        </span>,
+        <span>
+          若您还有其他问题可向
+          <Link
+            target="_blank"
+            rel="noreferrer noopener"
+            href="https://github.com/openyurtio/openyurt#contact"
+          >
+            OpenYurt社区
+          </Link>
+          反馈
+        </span>,
       ],
     };
   } else {
@@ -131,7 +148,17 @@ export function CompleteBlock({ res }) {
       subTitle: (
         <div>
           <p style={{ color: "red" }}>ERROR: {res.msg}</p>
-          <div>请重试当前操作，若仍出现问题可联系管理员 xxxx@alibaba.com</div>
+          <div>
+            请重试当前操作，若仍出现问题可向
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href="https://github.com/openyurtio/openyurt#contact"
+            >
+              OpenYurt社区
+            </a>
+            反馈
+          </div>
         </div>
       ),
     };

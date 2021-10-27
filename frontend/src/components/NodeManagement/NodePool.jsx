@@ -43,18 +43,18 @@ const columns = [
   // },
 ];
 
-const mockDataItem = {
-  name: "default-nodepool",
-  type: "默认节点池",
-  state: "已激活",
-  nodeStatus: {
-    ready: 1,
-    unready: 0,
-  },
-  os: "AliyunLinux",
-  updateTime: "2021-08-10 19:19:22",
-  operations: "",
-};
+// const mockDataItem = {
+//   name: "default-nodepool",
+//   type: "默认节点池",
+//   state: "已激活",
+//   nodeStatus: {
+//     ready: 1,
+//     unready: 0,
+//   },
+//   os: "AliyunLinux",
+//   updateTime: "2021-08-10 19:19:22",
+//   operations: "",
+// };
 
 const NodePool = () => {
   const [nps, handleRefresh] = useResourceState(getNodepools);

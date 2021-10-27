@@ -1,5 +1,5 @@
 import { Input, Select } from "antd";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getNodes, getNodepools } from "../../utils/request";
 import RSelect from "../Utils/RefreshableSelect";
 import STable from "../Utils/SelectableTable";
@@ -73,16 +73,43 @@ const options = [
   { content: "标注", dataIndex: "annotations" },
 ];
 
+// the Node panel
 export default function Nodes() {
+  // filtering
   // for filter components
   const [searchOption, setOption] = useState("title");
   const [searchValue, setSearchVal] = useState("");
   const [selectedNp, setNp] = useState("所有节点池");
 
-  const [allNodes, setAllNodes] = useState(null);
-  const [nodes, setNodes] = useState(allNodes); // display nodes
+  const [allNodes, setAllNodes] = useState(null); // all nodes
+  const [nodes, setNodes] = useState(allNodes); // display nodes after filtering
 
-  // refresh the whole table, reset all filter options
+  const filterNodes = (searchContent, selectedNodePool) => {
+    let filterValue = searchContent ? searchContent : searchValue;
+    let filterNp = selectedNodePool ? selectedNodePool : selectedNp;
+
+    setNodes(
+      allNodes &&
+        allNodes
+          .filter(
+            // filter by search value
+            (node) =>
+              JSON.stringify(node[searchOption]).indexOf(filterValue) >= 0
+            // searchOptions could be an Object
+          )
+          .filter(
+            // filter by selected nodepool
+            (node) => filterNp === "所有节点池" || node.nodePool === filterNp
+          )
+    );
+  };
+
+  const onSearch = (searchContent) => {
+    filterNodes(searchContent);
+  };
+
+  // refresh the whole table and reset all filter options
+  // Note: this won't update nodepool options and this may cause problems
   function onRefresh() {
     setSearchVal("");
     setOption("title");
@@ -96,29 +123,6 @@ export default function Nodes() {
   useEffect(() => {
     onRefresh();
   }, []);
-
-  const filterNodes = (searchContent, selectedNodePool) => {
-    let filterValue = searchContent ? searchContent : searchValue;
-    let filterNp = selectedNodePool ? selectedNodePool : selectedNp;
-
-    setNodes(
-      allNodes &&
-        allNodes
-          .filter(
-            // filter by search value
-            (node) =>
-              JSON.stringify(node[searchOption]).indexOf(filterValue) >= 0
-          )
-          .filter(
-            // filter by selected nodepool
-            (node) => filterNp === "所有节点池" || node.nodePool === filterNp
-          )
-    );
-  };
-
-  const onSearch = (searchContent) => {
-    filterNodes(searchContent);
-  };
 
   const filterComponents = (
     <div style={{ display: "inline-block" }}>
@@ -142,19 +146,20 @@ export default function Nodes() {
       />
 
       <RSelect
+        handleRefresh={useCallback(async () => {
+          // add "所有节点池" in select options anyway
+          return getNodepools().then((nps) => [
+            "所有节点池",
+            ...nps.map((np) => np.name),
+          ]);
+        }, [])}
+        handleChange={(selectedNodePool) => {
+          setNp(selectedNodePool);
+          filterNodes(null, selectedNodePool);
+        }}
         config={{
           style: { width: 120 },
           value: selectedNp,
-          handleChange: (selectedNodePool) => {
-            setNp(selectedNodePool);
-            filterNodes(null, selectedNodePool);
-          },
-          handleRefresh: async () => {
-            return getNodepools().then((nps) => [
-              "所有节点池",
-              ...nps.map((np) => np.name),
-            ]);
-          },
         }}
       />
     </div>

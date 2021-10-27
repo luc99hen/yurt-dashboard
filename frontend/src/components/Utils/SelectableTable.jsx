@@ -4,7 +4,7 @@ import { RefreshButton } from "./RefreshButton";
 
 /**
  * STable: Selectable Table
- * @param config.filterComponents
+ * @param config.filterComponents  // filter UI components
  * @param config.data       // table data
  * @param config.columns    // table columns
  * @param config.onRefresh  // refreshButton callback

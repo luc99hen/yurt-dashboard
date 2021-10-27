@@ -1,14 +1,25 @@
 import { message, Select } from "antd";
 import "./cluster.css";
 import { Dashboard } from "./Dashborad";
-import { EventTable } from "./EventTable";
+// import { EventTable } from "./EventTable";
 import { Status } from "../Utils/Status";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 const { Option } = Select;
 
 export default function ClusterOverview() {
   const [connStatus, setStatus] = useState("Loading");
+  const setConnStatus = useCallback((res) => {
+    // if any res is in False Status
+    for (let item of res) {
+      if ("Status" in item && item.Status === false) {
+        message.error("request cluster overview has some problems!");
+        setStatus("Fail");
+        return;
+      }
+    }
+    setStatus("Ready");
+  }, []);
 
   return (
     <div>
@@ -32,19 +43,7 @@ export default function ClusterOverview() {
       </div>
 
       <div style={{ margin: "20px 0" }}>
-        <Dashboard
-          setConnStatus={(res) => {
-            // if any res is in False Status
-            for (let item of res) {
-              if ("Status" in item && item.Status === false) {
-                message.error("request cluster overview has some problems!");
-                setStatus("Fail");
-                return;
-              }
-            }
-            setStatus("Ready");
-          }}
-        />
+        <Dashboard setConnStatus={setConnStatus} />
         {/* <EventTable /> */}
       </div>
     </div>
