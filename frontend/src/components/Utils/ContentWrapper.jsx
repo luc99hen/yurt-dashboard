@@ -1,5 +1,6 @@
 import React from "react";
-import { Layout, Menu, Button } from "antd";
+import { Layout, Menu, Button, Dropdown, Card, Divider } from "antd";
+import { DownOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import logo from "../../assets/OpenYurt.png";
 import { useSessionState } from "../../utils/hooks";
@@ -8,7 +9,11 @@ import {
   AppstoreTwoTone,
   GoldTwoTone,
 } from "@ant-design/icons";
-import { clearUserProfile } from "../../utils/utils";
+import {
+  clearUserProfile,
+  getUserLastTime,
+  getUserProfile,
+} from "../../utils/utils";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -73,25 +78,53 @@ const MySider = () => {
 };
 
 const ContentWithSider = ({ content, history }) => {
+  const userProfile = getUserProfile();
+  // if there is no userProfile (not logged in)
+  if (userProfile === null) {
+    history.push("/login");
+  }
+
+  const userManager = (
+    <Card style={{ padding: "5% 3%" }}>
+      <div>
+        您的账号还剩 {getUserLastTime(userProfile.status.effectiveTime)} 天过期
+      </div>
+      <Divider style={{ margin: "8px 0" }} />
+      <Button
+        type="text"
+        size="small"
+        style={{
+          color: "red",
+          width: "100%",
+        }}
+        onClick={() => {
+          clearUserProfile();
+          history.push("/login");
+        }}
+      >
+        <LogoutOutlined />
+        退出
+      </Button>
+    </Card>
+  );
+
   return (
     <Layout>
       <Header className="header">
         <img src={logo} alt="logo" className="logo"></img>
-        <Button
-          type="text"
-          style={{
-            float: "right",
-            color: "#1890FF",
-            marginTop: 13,
-            marginRight: 5,
-          }}
-          onClick={() => {
-            clearUserProfile();
-            history.push("/login");
-          }}
-        >
-          Log Out
-        </Button>
+        <Dropdown overlay={userManager}>
+          <Button
+            type="text"
+            style={{
+              float: "right",
+              color: "#1890FF",
+              marginTop: 13,
+              marginRight: 5,
+            }}
+          >
+            Hi, {userProfile.spec.mobilephone} <DownOutlined />
+          </Button>
+        </Dropdown>
       </Header>
       <Layout>
         <MySider></MySider>

@@ -91,6 +91,11 @@ export function formatTime(ISOString) {
   }
 }
 
+// Calculate how much time this user have left
+export function getUserLastTime(effectiveTime) {
+  return 7 - Math.floor((Date.now() - Date.parse(effectiveTime)) / (1000 * 24 * 3600));
+}
+
 export function getUserProfile() {
   let userStr = sessionStorage.getItem("user");
   if (!userStr) {
@@ -101,7 +106,7 @@ export function getUserProfile() {
   if (userStr) {
     let user = JSON.parse(userStr);
     // check if user is valid
-    if (Date.now() - Date.parse(user.status.effectiveTime) < 1000 * 7 * 24 * 3600) {
+    if (getUserLastTime(user.status.effectiveTime) > 0) {
       return user;
     }
     message.error("对不起，您的试用账号已过期！")
