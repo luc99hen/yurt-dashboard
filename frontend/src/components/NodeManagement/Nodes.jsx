@@ -1,9 +1,13 @@
-import { Input, Select } from "antd";
+import { Button, Input, Modal, Select } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { getNodes, getNodepools } from "../../utils/request";
 import RSelect from "../Utils/RefreshableSelect";
 import STable from "../Utils/SelectableTable";
-import { renderDictCell } from "../../utils/utils";
+import {
+  getUserProfile,
+  renderDictCell,
+  copy2clipboard,
+} from "../../utils/utils";
 import { Status } from "../Utils/Status";
 
 const { Option } = Select;
@@ -165,11 +169,51 @@ export default function Nodes() {
     </div>
   );
 
+  // nodeaddscript modal
+  const [visible, setVisible] = useState(false);
+  const userProfile = getUserProfile();
+  const nodeAddScript = userProfile
+    ? userProfile.spec.nodeAddScript
+    : "出现了一些问题";
+  const onCancel = () => {
+    setVisible(false);
+  };
+
   return (
     <div className="content">
       <div>
-        <h2>Node</h2>
+        <h2 style={{ display: "inline-block" }}>Node</h2>
+        <Button
+          type="default"
+          style={{ float: "right" }}
+          onClick={() => {
+            setVisible(true);
+          }}
+        >
+          节点接入
+        </Button>
       </div>
+
+      <Modal
+        visible={visible}
+        title="节点接入脚本"
+        onCancel={onCancel}
+        footer={[
+          <Button
+            onClick={() => {
+              copy2clipboard(nodeAddScript);
+              setVisible(false);
+            }}
+          >
+            复制并关闭
+          </Button>,
+          <Button type="primary" onClick={onCancel}>
+            关闭
+          </Button>,
+        ]}
+      >
+        {nodeAddScript}
+      </Modal>
 
       <STable
         config={{
