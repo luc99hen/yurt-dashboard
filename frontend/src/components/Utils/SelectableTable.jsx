@@ -13,7 +13,7 @@ function STable({ config }) {
   const [selected, setSelected] = useState([]);
 
   return (
-    <div>
+    <div style={{ margin: "10px 0" }}>
       <div style={{ marginBottom: 8 }}>
         {config.filterComponents}
         <RefreshButton refreshCallback={config.onRefresh}></RefreshButton>

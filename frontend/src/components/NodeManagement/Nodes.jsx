@@ -152,10 +152,9 @@ export default function Nodes() {
       <RSelect
         handleRefresh={useCallback(async () => {
           // add "所有节点池" in select options anyway
-          return getNodepools().then((nps) => [
-            "所有节点池",
-            ...nps.map((np) => np.name),
-          ]);
+          return getNodepools().then((nps) => {
+            return ["所有节点池", ...nps.map((np) => np.title)];
+          });
         }, [])}
         handleChange={(selectedNodePool) => {
           setNp(selectedNodePool);
