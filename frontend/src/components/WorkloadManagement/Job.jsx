@@ -1,5 +1,4 @@
 import { getJobs } from "../../utils/request";
-import { useResourceState } from "../../utils/hooks";
 import { renderDictCell } from "../../utils/utils";
 import { Status } from "../Utils/Status";
 import Workload from "./WorkloadTemplate";
@@ -78,12 +77,7 @@ const columns = [
 // ];
 
 export default function Job() {
-  const [jobs, onRefresh] = useResourceState(getJobs);
-
   return (
-    <Workload
-      title="Job"
-      table={{ columns, data: jobs, onRefresh: onRefresh }}
-    ></Workload>
+    <Workload title="Job" table={{ columns, fetchData: getJobs }}></Workload>
   );
 }
