@@ -36,7 +36,7 @@ func proxyRequest(c *gin.Context, fn K8sRequest) {
 		return
 	}
 
-	// ! assert content-type is "application/json" for client requst
+	// assert content-type is "application/json" for client requst
 	c.DataFromReader(http.StatusOK, int64(len(resBody)), "application/json", bytes.NewReader(resBody), nil)
 }
 

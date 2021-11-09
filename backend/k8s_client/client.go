@@ -8,8 +8,10 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 )
 
@@ -138,6 +140,22 @@ func (c *NodeClient) InitClient(kubeConfig string) (err error) {
 
 func (c *NodeClient) GetStatus(namespace string) (*ResourceStatus, error) {
 	return getNodeStatus(c.client, namespace)
+}
+
+// PATCH /api/v1/nodes/{nodeName}
+// patchData example: map[string]interface{}{"metadata": map[string]map[string]string{"annotations": {
+// 	"node.beta.alibabacloud.com/autonomy": "false",
+// }}}
+func (c *NodeClient) Patch(nodeName string, patchData map[string]interface{}) ([]byte, error) {
+
+	payload, err := json.Marshal(patchData)
+	if err != nil {
+		return nil, fmt.Errorf("Patch Node: json marshal patchData fail %w", err)
+	}
+
+	return c.client.Patch(types.MergePatchType).Resource(c.resourceName).Name(nodeName).
+		Body(payload).
+		DoRaw(context.TODO())
 }
 
 type DeploymentClient struct {
