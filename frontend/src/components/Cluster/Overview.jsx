@@ -10,15 +10,11 @@ const { Option } = Select;
 export default function ClusterOverview() {
   const [connStatus, setStatus] = useState("Loading");
   const setConnStatus = useCallback((res) => {
-    // if any res is in False Status
-    for (let item of res) {
-      if ("Status" in item && item.Status === false) {
-        message.error("request cluster overview has some problems!");
-        setStatus("Fail");
-        return;
-      }
-    }
-    setStatus("Ready");
+    // if any res item is in False Status
+    if (res && res.some((item) => "Status" in item && item.Status === false)) {
+      message.error("request cluster overview has some problems!");
+      setStatus("Fail");
+    } else setStatus("Ready");
   }, []);
 
   return (

@@ -57,6 +57,7 @@ const LoginForm = ({ gotoRegister, initState, history }) => {
           <Input
             prefix={<PhoneOutlined className="site-form-item-icon" />}
             placeholder="Phone Number"
+            aria-label="phonenumber-input"
           />
         </Form.Item>
         <Form.Item
@@ -71,6 +72,7 @@ const LoginForm = ({ gotoRegister, initState, history }) => {
           <Input
             prefix={<LockOutlined className="site-form-item-icon" />}
             type="password"
+            aria-label="password-input"
             placeholder="Password"
           />
         </Form.Item>
@@ -92,6 +94,7 @@ const LoginForm = ({ gotoRegister, initState, history }) => {
           <Button
             type="primary"
             htmlType="submit"
+            data-testid="login"
             className="login-form-button"
           >
             Log in

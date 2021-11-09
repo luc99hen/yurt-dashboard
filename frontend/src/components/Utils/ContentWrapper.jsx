@@ -87,7 +87,9 @@ const ContentWithSider = ({ content, history }) => {
   const userManager = (
     <Card style={{ padding: "5% 3%" }}>
       <div>
-        您的账号还剩 {getUserLastTime(userProfile.status.effectiveTime)} 天过期
+        您的账号还剩{" "}
+        {userProfile && getUserLastTime(userProfile.status.effectiveTime)}{" "}
+        天过期
       </div>
       <Divider style={{ margin: "8px 0" }} />
       <Button

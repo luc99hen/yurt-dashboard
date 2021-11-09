@@ -72,6 +72,7 @@ const RegisterForm = ({ register }) => {
             type="primary"
             htmlType="submit"
             className="login-form-button"
+            data-testid="register"
           >
             Register
           </Button>
