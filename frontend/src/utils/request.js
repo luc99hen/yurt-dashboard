@@ -31,13 +31,13 @@ export function sendUserRequest(path, data) {
   return sendRequest(path, { ...data, ...userProfile.spec }).catch((err) => {
     // catch request error
     message.error(err.message);
-    console.log(err.message)
+    console.log(err)
   }).then((res) => {
     if (res && !("status" in res && res.status === false)) {
       return res;
     } else {
       // return empty obj to keep interface consistency
-      return { items: [], filter: () => [], status: "error" };
+      return { items: [], filter: () => [], status: "error", some: () => true };
     }
   });
 }
@@ -58,8 +58,8 @@ export function getNodepools(paras) {
       ...transformObject(rawNodePool, i),
       type: rawNodePool.spec.type,
       nodeStatus: {
-        ready: rawNodePool.status.readyNodeNum,
-        unready: rawNodePool.status.unreadyNodeNum,
+        ready: rawNodePool.status ? rawNodePool.status.readyNodeNum : 0,
+        unready: rawNodePool.status ? rawNodePool.status.unreadyNodeNum : 0,
       },
     };
   };
@@ -115,6 +115,11 @@ export function getNodes(paras) {
         Runtime: rawNode.status.nodeInfo.containerRuntimeVersion,
         OS: rawNode.status.nodeInfo.osImage,
       },
+      operations: {
+        NodeName: rawNode.metadata.name,
+        Autonomy: "node.beta.alibabacloud.com/autonomy" in rawNode.metadata.annotations ?
+          rawNode.metadata.annotations["node.beta.alibabacloud.com/autonomy"] : "false"
+      }
     };
   };
 
