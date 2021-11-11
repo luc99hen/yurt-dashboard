@@ -53,6 +53,17 @@ func TestGetOverview(t *testing.T) {
 	assertNoErr(err, t)
 }
 
+func TestPatchNode(t *testing.T) {
+
+	patchData := map[string]interface{}{"metadata": map[string]map[string]string{"annotations": {
+		"node.beta.alibabacloud.com/autonomy": "false",
+	}}}
+	nodeName := "node1"
+
+	_, err := PatchNode(kubeConfig, nodeName, patchData)
+	assertNoErr(err, t)
+}
+
 func TestUser(t *testing.T) {
 
 	t.Run("post user format not allowed: invalid phonenumber", func(t *testing.T) {

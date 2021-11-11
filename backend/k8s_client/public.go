@@ -112,3 +112,14 @@ func CreateUser(kubeConfig string, user *UserSpec) (err error) {
 
 	return nil
 }
+
+// patch node
+func PatchNode(kubeConfig string, nodeName string, patchData map[string]interface{}) ([]byte, error) {
+	nodeClient := NodeClient{}
+	err := nodeClient.InitClient(kubeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create nodeClient: init client fail: %w", err)
+	}
+
+	return nodeClient.Patch(nodeName, patchData)
+}

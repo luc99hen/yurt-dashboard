@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"strings"
@@ -113,4 +114,29 @@ func registerHandler(c *gin.Context) {
 
 	JSONErr(c, http.StatusInternalServerError, "register: get created user fail: exceed maxretry")
 
+}
+
+func setNodeAutonomyHandler(c *gin.Context) {
+	requestParas := &struct {
+		User
+		NodeName string
+		Autonomy string
+	}{}
+
+	if err := c.BindJSON(requestParas); err != nil {
+		JSONErr(c, http.StatusBadRequest, fmt.Sprintf("setNodeAutonomy: parse parameters fail: %v", err))
+		return // parse failed, then abort
+	}
+
+	resBody, err := client.PatchNode(requestParas.KubeConfig,
+		requestParas.NodeName, map[string]interface{}{"metadata": map[string]map[string]string{"annotations": {
+			"node.beta.alibabacloud.com/autonomy": requestParas.Autonomy,
+		}}})
+	if err != nil {
+		JSONErr(c, http.StatusServiceUnavailable, err.Error())
+		return
+	}
+
+	// assert content-type is "application/json" for client requst
+	c.DataFromReader(http.StatusOK, int64(len(resBody)), "application/json", bytes.NewReader(resBody), nil)
 }
