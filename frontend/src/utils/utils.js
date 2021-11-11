@@ -91,12 +91,19 @@ export function formatTime(ISOString) {
   }
 }
 
+const msPerDay = 1000 * 24 * 3600;
 // Calculate how much time this user have left
 export function getUserLastTime(effectiveTime) {
-  return 7 - Math.floor((Date.now() - Date.parse(effectiveTime)) / (1000 * 24 * 3600));
+  return 7 - Math.floor((Date.now() - Date.parse(effectiveTime)) / (msPerDay));
 }
 
-export function getUserProfile() {
+export function getUserExpireTime(effectiveTime, days) {
+  const timestamp = Date.parse(effectiveTime) + days * msPerDay;
+  return new Date(timestamp).toLocaleString("zh-cn");
+}
+
+// noTip turns off the message popup
+export function getUserProfile(noTip = false) {
   let userStr = sessionStorage.getItem("user");
   if (!userStr) {
     userStr = localStorage.getItem("user");
@@ -109,7 +116,8 @@ export function getUserProfile() {
     if (getUserLastTime(user.status.effectiveTime) > 0) {
       return user;
     }
-    message.error("对不起，您的试用账号已过期！")
+    if (noTip)
+      message.error("对不起，您的试用账号已过期！")
   }
 
   return null;

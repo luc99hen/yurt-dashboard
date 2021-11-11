@@ -1,13 +1,15 @@
 import React from "react";
 import { Layout, Menu, Button, Dropdown, Card, Divider } from "antd";
-import { DownOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import logo from "../../assets/OpenYurt.png";
 import { useSessionState } from "../../utils/hooks";
 import {
-  InfoCircleTwoTone,
-  AppstoreTwoTone,
-  GoldTwoTone,
+  InfoCircleOutlined,
+  AppstoreOutlined,
+  GoldOutlined,
+  ExperimentOutlined,
+  DownOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import {
   clearUserProfile,
@@ -47,10 +49,10 @@ const MySider = () => {
         onOpenChange={onOpenChange}
         mode="inline"
       >
-        <Menu.Item key="clusterInfo" icon={<InfoCircleTwoTone />}>
+        <Menu.Item key="clusterInfo" icon={<InfoCircleOutlined />}>
           <Link to="/clusterInfo">集群信息</Link>
         </Menu.Item>
-        <SubMenu key="nodemanagement" icon={<GoldTwoTone />} title="节点管理">
+        <SubMenu key="nodemanagement" icon={<GoldOutlined />} title="节点管理">
           {/* <Menu.Item key="nodepool">
             <Link to="/nodepool">节点池</Link>
           </Menu.Item> */}
@@ -58,7 +60,7 @@ const MySider = () => {
             <Link to="/nodes">节点</Link>
           </Menu.Item>
         </SubMenu>
-        <SubMenu key="workload" icon={<AppstoreTwoTone />} title="工作负载">
+        <SubMenu key="workload" icon={<AppstoreOutlined />} title="工作负载">
           <Menu.Item key="pod">
             <Link to="/pod">容器组</Link>
           </Menu.Item>
@@ -72,6 +74,9 @@ const MySider = () => {
             <Link to="/job">任务</Link>
           </Menu.Item>
         </SubMenu>
+        <Menu.Item key="lab" icon={<ExperimentOutlined />}>
+          <Link to="/lab">实验室</Link>
+        </Menu.Item>
       </Menu>
     </Sider>
   );

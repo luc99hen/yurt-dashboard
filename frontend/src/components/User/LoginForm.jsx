@@ -84,7 +84,7 @@ const LoginForm = ({ gotoRegister, initState, history }) => {
           <Button
             type="text"
             onClick={() => gotoRegister()}
-            className="login-form-register"
+            className="form-transfer"
           >
             Register Now
           </Button>

@@ -1,7 +1,12 @@
 import { Form, Input, Button, Card } from "antd";
-import { MailOutlined, BankOutlined, PhoneOutlined } from "@ant-design/icons";
+import {
+  MailOutlined,
+  BankOutlined,
+  PhoneOutlined,
+  RollbackOutlined,
+} from "@ant-design/icons";
 
-const RegisterForm = ({ register }) => {
+const RegisterForm = ({ register, goToLogin }) => {
   const onSubmit = (formData) => {
     register(formData);
   };
@@ -77,6 +82,15 @@ const RegisterForm = ({ register }) => {
             Register
           </Button>
         </Form.Item>
+
+        <Button
+          type="text"
+          className="form-transfer"
+          icon={<RollbackOutlined />}
+          onClick={goToLogin}
+        >
+          Back to Log in
+        </Button>
       </Form>
     </Card>
   );

@@ -4,6 +4,7 @@ import { Dashboard } from "./Dashborad";
 // import { EventTable } from "./EventTable";
 import { Status } from "../Utils/Status";
 import { useCallback, useState } from "react";
+import { getUserProfile } from "../../utils/utils";
 
 const { Option } = Select;
 
@@ -17,21 +18,19 @@ export default function ClusterOverview() {
     } else setStatus("Ready");
   }, []);
 
+  const userProfile = getUserProfile(true);
+  const namespace = userProfile ? userProfile.metadata.namespace : "NULL";
+
   return (
     <div>
       <div>
         命名空间
         <Select
-          defaultValue="lucy"
+          defaultValue={namespace}
           style={{ width: 200, margin: "0 5px" }}
           disabled
         >
-          <Option value="jack">Jack</Option>
-          <Option value="lucy">Lucy</Option>
-          <Option value="disabled" disabled>
-            Disabled
-          </Option>
-          <Option value="Yiminghe">yiminghe</Option>
+          <Option value={namespace}>{namespace}</Option>
         </Select>
         <div style={{ float: "right", display: "inline-block" }}>
           <Status status={connStatus}></Status>

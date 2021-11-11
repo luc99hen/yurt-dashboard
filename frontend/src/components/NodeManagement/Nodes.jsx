@@ -93,8 +93,10 @@ export default function Nodes() {
                     }).then((res) => {
                       // if autonomy set fail, refresh the whole table
                       if (res.status === "error") {
-                        message.info("自治设置失败：刷新Node列表");
+                        message.info("节点自治设置失败：刷新Node列表");
                         onRefresh();
+                      } else {
+                        message.info("节点自治设置成功");
                       }
                     });
                   }}

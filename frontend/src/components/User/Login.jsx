@@ -49,7 +49,10 @@ export default function LoginPage() {
       ) : pageStatus === "register" ? (
         <div className="login">
           <IntroBlock />
-          <RegisterForm register={doRegist} />
+          <RegisterForm
+            register={doRegist}
+            goToLogin={() => setStatus("login")}
+          />
         </div>
       ) : (
         <div className="login">
