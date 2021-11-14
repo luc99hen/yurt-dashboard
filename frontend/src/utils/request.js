@@ -17,8 +17,7 @@ export function sendRequest(path, data) {
         throw new Error(res["msg"]);
       }
       return res;
-    })
-
+    });
 }
 
 // send request as a use (add user token in request body)
@@ -28,18 +27,25 @@ export function sendUserRequest(path, data) {
     // if userProfile is empty, redirect to login page
     window.location.replace("/login");
   }
-  return sendRequest(path, { ...data, ...userProfile.spec }).catch((err) => {
-    // catch request error
-    message.error(err.message);
-    console.log(err)
-  }).then((res) => {
-    if (res && !("status" in res && res.status === false)) {
-      return res;
-    } else {
-      // return empty obj to keep interface consistency
-      return { items: [], filter: () => [], status: "error", some: () => true };
-    }
-  });
+  return sendRequest(path, { ...data, ...userProfile.spec })
+    .catch((err) => {
+      // catch request error
+      message.error(err.message);
+      console.log(err);
+    })
+    .then((res) => {
+      if (res && !("status" in res && res.status === false)) {
+        return res;
+      } else {
+        // return empty obj to keep interface consistency
+        return {
+          items: [],
+          filter: () => [],
+          status: "error",
+          some: () => true,
+        };
+      }
+    });
 }
 
 // transform common attributes of an object for presentation
@@ -103,11 +109,11 @@ export function getNodes(paras) {
       status: {
         CPU: toPercentagePresentation(
           parseFloat(rawNode.status.allocatable.cpu) /
-          parseFloat(rawNode.status.capacity.cpu)
+            parseFloat(rawNode.status.capacity.cpu)
         ),
         Mem: toPercentagePresentation(
           parseFloat(rawNode.status.allocatable.memory) /
-          parseFloat(rawNode.status.capacity.memory)
+            parseFloat(rawNode.status.capacity.memory)
         ),
       },
       version: {
@@ -117,9 +123,13 @@ export function getNodes(paras) {
       },
       operations: {
         NodeName: rawNode.metadata.name,
-        Autonomy: "node.beta.alibabacloud.com/autonomy" in rawNode.metadata.annotations ?
-          rawNode.metadata.annotations["node.beta.alibabacloud.com/autonomy"] : "false"
-      }
+        Autonomy:
+          "node.beta.alibabacloud.com/autonomy" in rawNode.metadata.annotations
+            ? rawNode.metadata.annotations[
+                "node.beta.alibabacloud.com/autonomy"
+              ]
+            : "false",
+      },
     };
   };
 
@@ -172,8 +182,8 @@ export function getPods(paras) {
     ...transformObject(pod, i),
     containers: pod.spec.containers.map((container) => container.image),
     node: {
-      Name: pod.spec.nodeName,
-      IP: pod.status.hostIP,
+      Name: pod.spec.nodeName ? pod.spec.nodeName : "无",
+      IP: pod.status.hostIP ? pod.status.hostIP : "无",
     },
     title: {
       Name: pod.metadata.name,

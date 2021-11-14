@@ -1,9 +1,10 @@
 import { Card, Avatar } from "antd";
-import { LinkOutlined, SettingOutlined } from "@ant-design/icons";
+import { SettingOutlined } from "@ant-design/icons";
+import { Status } from "../Utils/Status";
 
 const { Meta } = Card;
 
-export default function App({ title, desc, setConfig, img, avatar }) {
+export default function App({ title, desc, setConfig, img, avatar, status }) {
   return (
     <Card
       style={{ width: 350, margin: "20px 10px" }}
@@ -11,8 +12,8 @@ export default function App({ title, desc, setConfig, img, avatar }) {
       hoverable={true}
       bordered={true}
       actions={[
+        <Status status={status ? "ON" : "OFF"} />,
         <SettingOutlined key="setting" onClick={setConfig} />, // setting modals
-        <LinkOutlined key="link" />, // link to the services homepage
       ]}
     >
       <Meta avatar={<Avatar src={avatar} />} title={title} description={desc} />

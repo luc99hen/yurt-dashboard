@@ -21,7 +21,7 @@ const columns = [
     render: (status) => {
       return (
         <div>
-          {status.readyReplicas}/{status.replicas}
+          {status.readyReplicas ? status.readyReplicas : 0}/{status.replicas}
         </div>
       );
     },
