@@ -129,7 +129,7 @@ const ContentWithSider = ({ content, history }) => {
               marginRight: 5,
             }}
           >
-            Hi, {userProfile.spec.mobilephone} <DownOutlined />
+            Hi, {userProfile && userProfile.spec.mobilephone} <DownOutlined />
           </Button>
         </Dropdown>
       </Header>

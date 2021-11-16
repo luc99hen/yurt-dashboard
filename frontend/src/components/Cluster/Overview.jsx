@@ -19,7 +19,7 @@ export default function ClusterOverview() {
   }, []);
 
   const userProfile = getUserProfile(true);
-  const namespace = userProfile ? userProfile.metadata.namespace : "NULL";
+  const namespace = userProfile ? userProfile.spec.namespace : "NULL";
 
   return (
     <div>
@@ -27,7 +27,7 @@ export default function ClusterOverview() {
         命名空间
         <Select
           defaultValue={namespace}
-          style={{ width: 200, margin: "0 5px" }}
+          style={{ width: 135, margin: "0 5px" }}
           disabled
         >
           <Option value={namespace}>{namespace}</Option>

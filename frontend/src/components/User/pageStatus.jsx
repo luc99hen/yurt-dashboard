@@ -63,7 +63,7 @@ export function LoadingBlock() {
   useEffect(() => {
     let handler = setInterval(
       () => setId((i) => (i + 1) % introList.length),
-      4000
+      3000
     );
     return handler ? () => clearInterval(handler) : null;
   }, []);

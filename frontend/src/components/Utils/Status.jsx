@@ -5,6 +5,7 @@ const colorState = {
   fail: "#F74336",
   loading: "#27e844",
   running: "#62CB35",
+  on: "#62CB35",
 };
 
 export function Status({ status }) {
