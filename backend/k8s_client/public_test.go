@@ -4,7 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	appsv1 "k8s.io/api/apps/v1"
+	apiv1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func assertNoErr(err error, t testing.TB) {
@@ -46,6 +49,49 @@ func TestGetRaw(t *testing.T) {
 		assertNoErr(err, t)
 	})
 
+}
+
+func TestWriteRaw(t *testing.T) {
+	t.Run("create deployment", func(t *testing.T) {
+
+		demoDeployment := &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "demo-deployment",
+			},
+			Spec: appsv1.DeploymentSpec{
+				Replicas: int32Ptr(1),
+				Selector: &metav1.LabelSelector{
+					MatchLabels: map[string]string{
+						"app": "demo",
+					},
+				},
+				Template: apiv1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: map[string]string{
+							"app": "demo",
+						},
+					},
+					Spec: apiv1.PodSpec{
+						Containers: []apiv1.Container{
+							{
+								Name:  "web",
+								Image: "nginx:1.12",
+								Ports: []apiv1.ContainerPort{
+									{
+										Name:          "http",
+										Protocol:      apiv1.ProtocolTCP,
+										ContainerPort: 80,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		err := CreateDeployment(kubeConfig, "18321778186", demoDeployment)
+		assertNoErr(err, t)
+	})
 }
 
 func TestGetOverview(t *testing.T) {

@@ -38,5 +38,6 @@ func setAPIGroup(router *gin.Engine) {
 		api.POST("/login", loginHandler)
 		api.POST("/register", registerHandler)
 		api.POST("/setNodeAutonomy", setNodeAutonomyHandler)
+		api.POST("/createDeployment", createDeploymentHandler)
 	}
 }

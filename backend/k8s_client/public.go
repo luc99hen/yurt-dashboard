@@ -123,3 +123,19 @@ func PatchNode(kubeConfig string, nodeName string, patchData map[string]interfac
 
 	return nodeClient.Patch(nodeName, patchData)
 }
+
+// create deployment
+func CreateDeployment(kubeConfig, namespace string, deployment interface{}) (err error) {
+	deploymentClient := &DeploymentClient{}
+	err = deploymentClient.InitClient(kubeConfig)
+	if err != nil {
+		return fmt.Errorf("create deployment: init client fail: %w", err)
+	}
+
+	err = deploymentClient.CreateRaw(namespace, deployment)
+	if err != nil {
+		return fmt.Errorf("create deployment: send request fail: %w", err)
+	}
+
+	return nil
+}
