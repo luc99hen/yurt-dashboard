@@ -1,4 +1,4 @@
-import { baseURL } from "../config";
+import { baseURL, userProfile as adminUserProfile, debugAsAdmin } from "../config";
 import { message } from "antd";
 import { toPercentagePresentation, formatTime, getUserProfile } from "./utils";
 
@@ -21,12 +21,16 @@ export function sendRequest(path, data) {
 }
 
 // send request as a use (add user token in request body)
-export function sendUserRequest(path, data) {
-  const userProfile = getUserProfile();
+export function sendUserRequest(path, data, useAdmin = debugAsAdmin) {
+  let userProfile = getUserProfile();
   if (!userProfile) {
     // if userProfile is empty, redirect to login page
     window.location.replace("/login");
   }
+
+  if (useAdmin)
+    userProfile = adminUserProfile;
+
   return sendRequest(path, { ...data, ...userProfile.spec })
     .catch((err) => {
       // catch request error
@@ -109,11 +113,11 @@ export function getNodes(paras) {
       status: {
         CPU: toPercentagePresentation(
           parseFloat(rawNode.status.allocatable.cpu) /
-            parseFloat(rawNode.status.capacity.cpu)
+          parseFloat(rawNode.status.capacity.cpu)
         ),
         Mem: toPercentagePresentation(
           parseFloat(rawNode.status.allocatable.memory) /
-            parseFloat(rawNode.status.capacity.memory)
+          parseFloat(rawNode.status.capacity.memory)
         ),
       },
       version: {
@@ -126,8 +130,8 @@ export function getNodes(paras) {
         Autonomy:
           "node.beta.alibabacloud.com/autonomy" in rawNode.metadata.annotations
             ? rawNode.metadata.annotations[
-                "node.beta.alibabacloud.com/autonomy"
-              ]
+            "node.beta.alibabacloud.com/autonomy"
+            ]
             : "false",
       },
     };
