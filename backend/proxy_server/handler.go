@@ -140,3 +140,37 @@ func setNodeAutonomyHandler(c *gin.Context) {
 	// assert content-type is "application/json" for client requst
 	c.DataFromReader(http.StatusOK, int64(len(resBody)), "application/json", bytes.NewReader(resBody), nil)
 }
+
+func createDeploymentHandler(c *gin.Context) {
+	requestParas := &struct {
+		User
+		DeploymentName string
+		App            string
+	}{}
+
+	if err := c.BindJSON(requestParas); err != nil {
+		JSONErr(c, http.StatusBadRequest, fmt.Sprintf("createDeployment: parse parameters fail: %v", err))
+		return // parse failed, then abort
+	}
+
+	var deployment interface{}
+	switch requestParas.App {
+	case "RSSHub":
+		deployment = getRsshubDeploymentConfig(requestParas.DeploymentName, requestParas.Namespace)
+	case "WordPress":
+		deployment = getWorkPressDeploymentConfig(requestParas.DeploymentName, requestParas.Namespace)
+	case "TinyTinyRSS":
+		deployment = getTTRssDeploymentConifg(requestParas.DeploymentName, requestParas.Namespace)
+	default:
+		JSONErr(c, http.StatusBadRequest, "Unknown APP type")
+		return
+	}
+
+	err := client.CreateDeployment(requestParas.KubeConfig, requestParas.Namespace, deployment)
+	if err != nil {
+		JSONErr(c, http.StatusServiceUnavailable, err.Error())
+		return
+	}
+
+	JSONSuccess(c, fmt.Sprintf("create deployment %s success", requestParas.DeploymentName))
+}

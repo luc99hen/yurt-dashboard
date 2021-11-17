@@ -46,3 +46,12 @@ func JSONErr(c *gin.Context, code int, msg string) {
 		"status": false,
 	})
 }
+
+func JSONSuccess(c *gin.Context, msg string) {
+	c.JSON(http.StatusOK, gin.H{
+		"msg":    msg,
+		"status": true,
+	})
+}
+
+func int32Ptr(i int32) *int32 { return &i }
