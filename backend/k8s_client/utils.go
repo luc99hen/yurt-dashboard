@@ -58,10 +58,31 @@ func listRaw(kubeConfig, namespace string, resourceConfig *ResourceConfig) ([]by
 	rawClient := &baseClient{}
 	err := rawClient.InitClient(kubeConfig, resourceConfig)
 	if err != nil {
-		return nil, fmt.Errorf("list raw fail: %v", err)
+		return nil, fmt.Errorf("list raw %s fail: %w", rawClient.resourceName, err)
 	}
 
 	return rawClient.ListRaw(namespace)
+}
+
+// createRaw create a resourceClient and uses it to create a resource
+func createRaw(kubeConfig, namespace string, resourceConfig *ResourceConfig, obj interface{}) error {
+	rawClient := &baseClient{}
+	err := rawClient.InitClient(kubeConfig, resourceConfig)
+	if err != nil {
+		return fmt.Errorf("create raw %s init client fail: %w", rawClient.resourceName, err)
+	}
+
+	return rawClient.CreateRaw(namespace, obj)
+}
+
+func deleteRaw(kubeConfig, namespace string, resourceConfig *ResourceConfig, name string) error {
+	rawClient := &baseClient{}
+	err := rawClient.InitClient(kubeConfig, resourceConfig)
+	if err != nil {
+		return fmt.Errorf("delete raw %s init client fail: %w", rawClient.resourceName, err)
+	}
+
+	return rawClient.DeleteRaw(namespace, name)
 }
 
 func getPodStatus(client *rest.RESTClient, namespace string) (status *ResourceStatus, err error) {

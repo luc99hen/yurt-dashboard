@@ -159,7 +159,7 @@ func createDeploymentHandler(c *gin.Context) {
 		deployment = getRsshubDeploymentConfig(requestParas.DeploymentName, requestParas.Namespace)
 	case "WordPress":
 		deployment = getWorkPressDeploymentConfig(requestParas.DeploymentName, requestParas.Namespace)
-	case "TinyTinyRSS":
+	case "EdgeXFoundry":
 		deployment = getTTRssDeploymentConifg(requestParas.DeploymentName, requestParas.Namespace)
 	default:
 		JSONErr(c, http.StatusBadRequest, "Unknown APP type")

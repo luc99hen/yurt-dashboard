@@ -3,7 +3,9 @@ public.go exposes out-of-the-box function used by proxy_server
 */
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // get admin kubeconfg
 func GetAdminKubeConfig() string {
@@ -23,6 +25,11 @@ func GetRawDeployment(kubeConfig, namespace string) ([]byte, error) {
 // get nodes which belong to one user (based on the kubeconfig)
 func GetRawNode(kubeConfig, namespace string) ([]byte, error) { // namespace is used for compatity
 	return listRaw(kubeConfig, "", &NodeConfig)
+}
+
+// get service
+func GetRawService(kubeConfig, namespace string) ([]byte, error) {
+	return listRaw(kubeConfig, namespace, &ServiceConfig)
 }
 
 // get statefulsets which belong to one user (based on the kubeconfig)
@@ -99,18 +106,11 @@ func GetUser(kubeConfig, phoneNumber string) (*User, error) {
 
 // Create User Obj
 func CreateUser(kubeConfig string, user *UserSpec) (err error) {
-	userClient := &UserClient{}
-	err = userClient.InitClient(kubeConfig)
-	if err != nil {
-		return fmt.Errorf("create user: init client fail: %w", err)
-	}
+	return createRaw(kubeConfig, userStoreNS, &UserConfig, createUser(user))
+}
 
-	err = userClient.CreateRaw(userStoreNS, createUser(user))
-	if err != nil {
-		return fmt.Errorf("create user: send request fail: %w", err)
-	}
-
-	return nil
+func DeleteUser(kubeConfig, userName string) (err error) {
+	return deleteRaw(kubeConfig, userStoreNS, &UserConfig, userName)
 }
 
 // patch node
@@ -126,16 +126,18 @@ func PatchNode(kubeConfig string, nodeName string, patchData map[string]interfac
 
 // create deployment
 func CreateDeployment(kubeConfig, namespace string, deployment interface{}) (err error) {
-	deploymentClient := &DeploymentClient{}
-	err = deploymentClient.InitClient(kubeConfig)
-	if err != nil {
-		return fmt.Errorf("create deployment: init client fail: %w", err)
-	}
+	return createRaw(kubeConfig, namespace, &DeploymentConfig, deployment)
+}
 
-	err = deploymentClient.CreateRaw(namespace, deployment)
-	if err != nil {
-		return fmt.Errorf("create deployment: send request fail: %w", err)
-	}
+// delete deployment
+func DeleteDeployment(kubeConfig, namespace, name string) (err error) {
+	return deleteRaw(kubeConfig, namespace, &DeploymentConfig, name)
+}
 
-	return nil
+func CreateService(kubeConfig, namespace string, obj interface{}) error {
+	return createRaw(kubeConfig, namespace, &ServiceConfig, obj)
+}
+
+func DeleteService(kubeConfig, namespace, serviceName string) error {
+	return deleteRaw(kubeConfig, namespace, &ServiceConfig, serviceName)
 }

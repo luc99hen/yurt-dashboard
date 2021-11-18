@@ -73,6 +73,13 @@ var (
 		GroupVersion: &schema.GroupVersion{Group: "user.openyurt.io", Version: "v1alpha1"},
 		ResourceName: "users",
 	}
+
+	// request path: /api/v1/namespaces/{namespace}/services
+	ServiceConfig = ResourceConfig{
+		APIPath:      "api",
+		GroupVersion: &schema.GroupVersion{Group: "", Version: "v1"},
+		ResourceName: "services",
+	}
 )
 
 // specifies which namespace the created User will be stored

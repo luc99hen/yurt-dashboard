@@ -26,6 +26,7 @@ type RawReader interface {
 
 type RawWriter interface {
 	CreateRaw(namespace string, body interface{}) error
+	DeleteRaw(namespace, name string) error
 }
 
 type ResourceStatus struct {
@@ -87,6 +88,20 @@ func (c *baseClient) CreateRaw(namespace string, obj interface{}) error {
 		Resource(c.resourceName).
 		Body(obj).
 		DoRaw(context.TODO())
+	return err
+}
+
+// delete obj resource in k8s
+func (c *baseClient) DeleteRaw(namespace, name string) error {
+	req := c.client.Delete()
+	if namespace != "" {
+		req = req.Namespace(namespace)
+	}
+
+	_, err := req.Resource(c.resourceName).
+		Name(name).
+		DoRaw(context.TODO())
+
 	return err
 }
 
@@ -193,3 +208,5 @@ func (c *JobClient) InitClient(kubeConfig string) (err error) {
 func (c *JobClient) GetStatus(namespace string) (*ResourceStatus, error) {
 	return getJobStatus(c.client, namespace)
 }
+
+type ServiceClient baseClient
