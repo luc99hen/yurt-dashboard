@@ -4,16 +4,23 @@ import { Status } from "../Utils/Status";
 
 const { Meta } = Card;
 
-export default function App({ title, desc, setConfig, img, avatar, status }) {
+export default function App({
+  title,
+  desc,
+  setConfig: openModal,
+  img,
+  avatar,
+  status,
+}) {
   return (
     <Card
-      style={{ width: 350, margin: "20px 10px" }}
+      style={{ minWidth: 300, maxWidth: 350, margin: "20px 10px" }}
       cover={<img alt="example" src={img} />}
       hoverable={true}
       bordered={true}
       actions={[
         <Status status={status ? "ON" : "OFF"} />,
-        <SettingOutlined key="setting" onClick={setConfig} />, // setting modals
+        <SettingOutlined key="setting" onClick={openModal} />, // setting modals
       ]}
     >
       <Meta avatar={<Avatar src={avatar} />} title={title} description={desc} />

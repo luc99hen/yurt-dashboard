@@ -1,43 +1,48 @@
 import App from "./App";
 import { Modal, Form, message } from "antd";
 import { Input, Button, InputNumber, Switch } from "antd";
+import { RightOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { getDeployments, getNodes, sendUserRequest } from "../../utils/request";
+import { withRouter } from "react-router";
+import { debugAsAdmin } from "../../config";
+
+const appInfo = {
+  RSSHub: {
+    avatar:
+      "https://camo.githubusercontent.com/79f2dcf6fb41b71619186b12eed25495fa55e20d3f21355798a2cb22703c6f8b/68747470733a2f2f692e6c6f6c692e6e65742f323031392f30342f32332f356362656237653431343134632e706e67",
+    desc: "RSSHub 是一个开源、简单易用、易于扩展的 RSS 生成器，可以给任何奇奇怪怪的内容生成 RSS 订阅源。RSSHub 借助于开源社区的力量快速发展中，目前已适配数百家网站的上千项内容。",
+    img: "https://store-images.s-microsoft.com/image/apps.26097.717f8ad3-f5cc-479d-8b33-e34b63ca5b78.48a82a81-a971-4050-876d-2cdd1190f1e8.debf4886-b41e-4d62-b442-ebd6b7f6b2c9",
+    container: ["diygod/rsshub"],
+  },
+  WordPress: {
+    avatar:
+      "https://th.bing.com/th/id/OIP.Q5K3ZcL44_iWH0CfOeyh-AHaHW?w=169&h=180&c=7&r=0&o=5&dpr=2&pid=1.7",
+    desc: "WordPress是一个以PHP和MySQL为平台的自由开源的博客软件和内容管理系统。WordPress是最受欢迎的网站内容管理系统。全球有大约30%的网站都是使用WordPress架设网站的。",
+    img: "https://websitesetup.org/wp-content/uploads/2018/03/cms-comparison-wordpress-vs-joomla-vs-drupal-wordpress-dashboard-1024x640.jpg",
+    container: ["wordpress", "mysql:5.7"],
+  },
+};
 
 function useModalConfig(refreshConfigList) {
   const initConfigList = [
     {
       app: "RSSHub",
       created: false,
-      avatar:
-        "https://camo.githubusercontent.com/79f2dcf6fb41b71619186b12eed25495fa55e20d3f21355798a2cb22703c6f8b/68747470733a2f2f692e6c6f6c692e6e65742f323031392f30342f32332f356362656237653431343134632e706e67",
-      desc: "RSSHub 是一个开源、简单易用、易于扩展的 RSS 生成器，可以给任何奇奇怪怪的内容生成 RSS 订阅源。RSSHub 借助于开源社区的力量快速发展中，目前已适配数百家网站的上千项内容。",
-      img: "https://store-images.s-microsoft.com/image/apps.26097.717f8ad3-f5cc-479d-8b33-e34b63ca5b78.48a82a81-a971-4050-876d-2cdd1190f1e8.debf4886-b41e-4d62-b442-ebd6b7f6b2c9",
+      info: appInfo["RSSHub"],
       dpName: "lab-rsshub-dp",
       service: false,
-      port: 3000,
-    },
-    {
-      app: "TinyTinyRSS",
-      created: false,
-      avatar:
-        "https://th.bing.com/th/id/OIP.ruxnNw4E8mxjHrWC1SA-RgAAAA?w=115&h=124&c=7&r=0&o=5&dpr=2&pid=1.7",
-      desc: "Tiny Tiny RSS是一个受欢迎的基于Web的开源新闻提要(RSS/Atom)聚合器，旨在让你从任何地方阅读新闻。它是一个安装在Web服务器上的Web应用程序，并提供了丰富的可定制化功能。",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8iwhmFTlhnFG_ari3OFcElThvQHTx_cvvfg&usqp=CAU",
-      dpName: "lab-ttrss-dp",
-      service: false,
-      port: 181,
+      port: 30001,
+      replicas: 1,
     },
     {
       app: "WordPress",
       created: false,
-      avatar:
-        "https://th.bing.com/th/id/OIP.Q5K3ZcL44_iWH0CfOeyh-AHaHW?w=169&h=180&c=7&r=0&o=5&dpr=2&pid=1.7",
-      desc: "WordPress是一个以PHP和MySQL为平台的自由开源的博客软件和内容管理系统。WordPress是最受欢迎的网站内容管理系统。全球有大约30%的网站都是使用WordPress架设网站的。",
-      img: "https://websitesetup.org/wp-content/uploads/2018/03/cms-comparison-wordpress-vs-joomla-vs-drupal-wordpress-dashboard-1024x640.jpg",
+      info: appInfo["WordPress"],
       dpName: "lab-wordpress-dp",
       service: false,
-      port: 80,
+      port: 30002,
+      replicas: 1,
     },
   ];
 
@@ -94,10 +99,10 @@ function updateConfigList(oldConfigList, dpList) {
       labDpList.find((dp) => dp.app === name)
     );
 
-  return ["RSSHub", "TinyTinyRSS", "WordPress"].map(combineItemByName);
+  return Object.keys(appInfo).map(combineItemByName);
 }
 
-export default function Lab() {
+function Lab({ history }) {
   const [
     isModalVisible,
     modalTip,
@@ -124,9 +129,9 @@ export default function Lab() {
         {appList.map((item, index) => (
           <App
             key={index}
-            avatar={item.avatar}
-            desc={item.desc}
-            img={item.img}
+            avatar={item.info.avatar}
+            desc={item.info.desc}
+            img={item.info.img}
             title={item.app}
             status={item.created === true}
             setConfig={() => {
@@ -143,11 +148,25 @@ export default function Lab() {
         onCancel={closeModal}
         footer={[
           <Button
+            style={{
+              float: "left",
+              display: modalConfig.created ? "" : "none",
+            }}
+            onClick={() => {
+              history.push("/deployment");
+            }}
+          >
+            更多详细信息 <RightOutlined />
+          </Button>,
+          <Button type="primary" danger disabled={!modalConfig.created}>
+            卸载
+          </Button>,
+          <Button
             type="primary"
             disabled={modalConfig.created}
             onClick={doDeploy}
           >
-            部署
+            安装
           </Button>,
         ]}
       >
@@ -160,7 +179,7 @@ export default function Lab() {
           }}
           layout="horizontal"
         >
-          <Form.Item label="Name" tooltip="Deployment名称">
+          <Form.Item label="Name" tooltip="部署Deployment名称">
             <Input
               value={modalConfig.dpName}
               disabled={modalConfig.created}
@@ -170,6 +189,22 @@ export default function Lab() {
                 });
               }}
             />
+          </Form.Item>
+
+          <Form.Item label="Replicas" tooltip="部署实例数">
+            <InputNumber
+              disabled={modalConfig.created}
+              value={modalConfig.replicas}
+              onChange={(val) =>
+                setConfig({
+                  replicas: val,
+                })
+              }
+            />
+          </Form.Item>
+
+          <Form.Item label="Container" tooltip="APP使用的容器镜像">
+            {modalConfig.info.container.join(", ")}
           </Form.Item>
 
           <Form.Item
@@ -220,14 +255,14 @@ export default function Lab() {
     }
     if (
       modalConfig.service &&
-      (modalConfig.port < 0 || modalConfig.port > 65535)
+      (modalConfig.port < 30000 || modalConfig.port > 32767)
     ) {
-      setTip("Tips: 端口范围需要在0到65535之间");
+      setTip("Tips: 端口范围需要在30000-32767之间");
       return;
     }
 
     const nodeList = await getNodes();
-    if (nodeList.length === 0) {
+    if (!debugAsAdmin && nodeList.length === 0) {
       setTip("Tips: 请您先至少接入一个节点， 然后再尝试实验室功能😄。");
       return;
     }
@@ -235,10 +270,17 @@ export default function Lab() {
     // create deployment
     sendUserRequest("/createDeployment", {
       DeploymentName: modalConfig.dpName,
+      App: modalConfig.app,
     })
       .then((res) => {
-        if (!("status" in res) || res.status !== "error") {
-          message.info(res);
+        console.log(res);
+        if (res.status === true) {
+          // since antd.message conflict with antd.Modal
+          // use setTimeout to show message after modal is closed
+          setTimeout(() => message.info(res.msg), 1000);
+          setConfig({
+            created: true,
+          });
         }
       })
       .finally(closeModal);
@@ -248,3 +290,5 @@ export default function Lab() {
     }
   }
 }
+
+export default withRouter(Lab);
