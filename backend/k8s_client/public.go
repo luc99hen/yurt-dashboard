@@ -5,6 +5,9 @@ package client
 
 import (
 	"fmt"
+
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // get admin kubeconfg
@@ -22,6 +25,17 @@ func GetRawDeployment(kubeConfig, namespace string) ([]byte, error) {
 	return listRaw(kubeConfig, namespace, &DeploymentConfig)
 }
 
+// get dp list
+func GetDeployment(kubeConfig, namespace string) (*appsv1.DeploymentList, error) {
+	dpClient := &DeploymentClient{}
+	err := dpClient.InitClient(kubeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("get deployment: init client fail: %w", err)
+	}
+
+	return dpClient.Get(namespace)
+}
+
 // get nodes which belong to one user (based on the kubeconfig)
 func GetRawNode(kubeConfig, namespace string) ([]byte, error) { // namespace is used for compatity
 	return listRaw(kubeConfig, "", &NodeConfig)
@@ -30,6 +44,17 @@ func GetRawNode(kubeConfig, namespace string) ([]byte, error) { // namespace is 
 // get service
 func GetRawService(kubeConfig, namespace string) ([]byte, error) {
 	return listRaw(kubeConfig, namespace, &ServiceConfig)
+}
+
+// get service list
+func GetService(kubeConfig, namespace string) (*corev1.ServiceList, error) {
+	svcClient := &ServiceClient{}
+	err := svcClient.InitClient(kubeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("get service: init client fail: %w", err)
+	}
+
+	return svcClient.Get(namespace)
 }
 
 // get statefulsets which belong to one user (based on the kubeconfig)

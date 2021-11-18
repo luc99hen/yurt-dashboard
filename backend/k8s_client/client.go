@@ -11,6 +11,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 )
@@ -185,6 +187,21 @@ func (c *DeploymentClient) GetStatus(namespace string) (*ResourceStatus, error) 
 	return getDeploymentStatus(c.client, namespace)
 }
 
+// get deployment list
+func (c *DeploymentClient) Get(namespace string) (*appsv1.DeploymentList, error) {
+	// get deployments into list
+	dpList := &appsv1.DeploymentList{}
+	err := doGetReq(c.client, namespace, DeploymentConfig.ResourceName).
+		Do(context.TODO()).
+		Into(dpList)
+
+	if err != nil {
+		return nil, fmt.Errorf("request deployments fail: %v", err)
+	}
+
+	return dpList, nil
+}
+
 type StatefulsetClient struct {
 	baseClient
 }
@@ -209,4 +226,25 @@ func (c *JobClient) GetStatus(namespace string) (*ResourceStatus, error) {
 	return getJobStatus(c.client, namespace)
 }
 
-type ServiceClient baseClient
+type ServiceClient struct {
+	baseClient
+}
+
+func (c *ServiceClient) InitClient(kubeConfig string) (err error) {
+	return c.baseClient.InitClient(kubeConfig, &ServiceConfig)
+}
+
+// get service list
+func (c *ServiceClient) Get(namespace string) (*corev1.ServiceList, error) {
+	// get deployments into list
+	svcList := &corev1.ServiceList{}
+	err := doGetReq(c.client, namespace, ServiceConfig.ResourceName).
+		Do(context.TODO()).
+		Into(svcList)
+
+	if err != nil {
+		return nil, fmt.Errorf("request service fail: %v", err)
+	}
+
+	return svcList, nil
+}

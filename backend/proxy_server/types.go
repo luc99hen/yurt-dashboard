@@ -16,7 +16,7 @@ type User struct {
 
 var adminKubeConfig = client.GetAdminKubeConfig()
 
-func getWorkPressDeploymentConfig(name, namespace string) interface{} {
+func getWorkPressDeploymentConfig(name, namespace string, replicas int) interface{} {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -27,7 +27,7 @@ func getWorkPressDeploymentConfig(name, namespace string) interface{} {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(1),
+			Replicas: int32Ptr(int32(replicas)),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": "WordPress",
@@ -120,7 +120,7 @@ func getWorkPressDeploymentConfig(name, namespace string) interface{} {
 	}
 }
 
-func getRsshubDeploymentConfig(name, namespace string) interface{} {
+func getRsshubDeploymentConfig(name, namespace string, replicas int) interface{} {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -131,7 +131,7 @@ func getRsshubDeploymentConfig(name, namespace string) interface{} {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(1),
+			Replicas: int32Ptr(int32(replicas)),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": "RSSHub",
@@ -150,7 +150,7 @@ func getRsshubDeploymentConfig(name, namespace string) interface{} {
 							Image: "diygod/rsshub",
 							Ports: []apiv1.ContainerPort{
 								{
-									ContainerPort: 1200,
+									ContainerPort: 80,
 								},
 							},
 						},
@@ -161,7 +161,31 @@ func getRsshubDeploymentConfig(name, namespace string) interface{} {
 	}
 }
 
-func getTTRssDeploymentConifg(name, namespace string) interface{} {
+func getServiceConfig(appName, namespace string, port int) interface{} {
+	return &apiv1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      getAppServiceName(appName),
+			Namespace: namespace,
+			Labels: map[string]string{
+				"type": "lab",
+				"app":  appName,
+			},
+		},
+		Spec: apiv1.ServiceSpec{
+			Ports: []apiv1.ServicePort{{
+				Name:     "http",
+				Port:     80,
+				NodePort: int32(port),
+			}},
+			Selector: map[string]string{
+				"app": appName,
+			},
+			Type: apiv1.ServiceTypeNodePort,
+		},
+	}
+}
+
+func getTTRssDeploymentConifg(name, namespace string, replicas int) interface{} {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -172,7 +196,7 @@ func getTTRssDeploymentConifg(name, namespace string) interface{} {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(1),
+			Replicas: int32Ptr(int32(replicas)),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": "TinyTinyRSS",
