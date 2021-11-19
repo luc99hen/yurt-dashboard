@@ -32,17 +32,24 @@ export function Dashboard({ setConnStatus }) {
         loading={clusterStatus == null}
       >
         <h3>应用状态</h3>
-        <div style={{ display: "flex", justifyContent: "space-around" }}>
+        <div
+          style={{
+            marginTop: 18,
+            display: "flex",
+            justifyContent: "space-around",
+          }}
+        >
           <PieChart
-            name="部署"
+            name="Pod"
+            status={getResourceStatus(clusterStatus, "pods")}
+          ></PieChart>
+          <PieChart
+            name="Deployment"
             status={getResourceStatus(clusterStatus, "deployments")}
           ></PieChart>
+
           <PieChart
-            name="任务"
-            status={getResourceStatus(clusterStatus, "jobs")}
-          ></PieChart>
-          <PieChart
-            name="有状态副本集"
+            name="StatefulSet"
             status={getResourceStatus(clusterStatus, "statefulsets")}
           ></PieChart>
         </div>

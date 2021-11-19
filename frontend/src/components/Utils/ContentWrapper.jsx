@@ -53,9 +53,9 @@ const MySider = () => {
           <Link to="/clusterInfo">集群信息</Link>
         </Menu.Item>
         <SubMenu key="nodemanagement" icon={<GoldOutlined />} title="节点管理">
-          {/* <Menu.Item key="nodepool">
+          <Menu.Item key="nodepool">
             <Link to="/nodepool">节点池</Link>
-          </Menu.Item> */}
+          </Menu.Item>
           <Menu.Item key="nodes">
             <Link to="/nodes">节点</Link>
           </Menu.Item>

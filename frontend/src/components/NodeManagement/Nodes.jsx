@@ -147,7 +147,7 @@ export default function Nodes() {
   // filter options
   const options = [
     { content: "名称", dataIndex: "title" },
-    { content: "标签", dataIndex: "labels" },
+    { content: "标签", dataIndex: "tag" },
     { content: "标注", dataIndex: "annotations" },
   ];
 

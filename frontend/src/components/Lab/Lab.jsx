@@ -3,7 +3,7 @@ import { Modal, Form, message } from "antd";
 import { Input, Button, InputNumber, Switch } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { getDeployments, getNodes, sendUserRequest } from "../../utils/request";
+import { getNodes, sendUserRequest } from "../../utils/request";
 import { withRouter } from "react-router";
 import { debugAsAdmin } from "../../config";
 
@@ -31,7 +31,7 @@ function useModalConfig(refreshConfigList) {
       created: false,
       info: appInfo["RSSHub"],
       dpName: "lab-rsshub-dp",
-      service: false,
+      service: true,
       port: 30001,
       replicas: 1,
     },
@@ -40,7 +40,7 @@ function useModalConfig(refreshConfigList) {
       created: false,
       info: appInfo["WordPress"],
       dpName: "lab-wordpress-dp",
-      service: false,
+      service: true,
       port: 30002,
       replicas: 1,
     },
@@ -49,8 +49,10 @@ function useModalConfig(refreshConfigList) {
   const [modalConfigList, setConfigList] = useState(initConfigList);
   const [selectedModal, setSelected] = useState(0);
   useEffect(() => {
-    getDeployments().then((dpList) =>
-      setConfigList((oldConfigList) => refreshConfigList(oldConfigList, dpList))
+    sendUserRequest("/getApps").then((appList) =>
+      setConfigList((oldConfigList) =>
+        refreshConfigList(oldConfigList, appList)
+      )
     );
   }, [refreshConfigList]);
 
@@ -84,19 +86,20 @@ function useModalConfig(refreshConfigList) {
   ];
 }
 
-function updateConfigList(oldConfigList, dpList) {
-  const labDpList = dpList
-    .filter((dp) => dp.tag && dp.tag.type && dp.tag.type === "lab")
-    .map((dp) => ({
-      ...dp.tag,
+function updateConfigList(oldConfigList, appList) {
+  const appConfigList = appList
+    .filter((app) => app.Deployment !== null)
+    .map((app) => ({
+      ...app.Deployment.metadata.labels,
       created: true,
-      dpName: dp.title,
+      dpName: app.Deployment.metadata.name,
+      service: app.Service !== null,
     }));
 
   const combineItemByName = (name) =>
     Object.assign(
       oldConfigList.find((config) => config.app === name),
-      labDpList.find((dp) => dp.app === name)
+      appConfigList.find((dp) => dp.app === name)
     );
 
   return Object.keys(appInfo).map(combineItemByName);
@@ -158,13 +161,18 @@ function Lab({ history }) {
           >
             更多详细信息 <RightOutlined />
           </Button>,
-          <Button type="primary" danger disabled={!modalConfig.created}>
+          <Button
+            type="primary"
+            danger
+            disabled={!modalConfig.created}
+            onClick={uninstallApp}
+          >
             卸载
           </Button>,
           <Button
             type="primary"
             disabled={modalConfig.created}
-            onClick={doDeploy}
+            onClick={installApp}
           >
             安装
           </Button>,
@@ -244,7 +252,26 @@ function Lab({ history }) {
     </div>
   );
 
-  async function doDeploy() {
+  function uninstallApp() {
+    sendUserRequest("/uninstallApp", {
+      DeploymentName: modalConfig.dpName,
+      App: modalConfig.app,
+      Service: modalConfig.service,
+    })
+      .then((res) => {
+        if (res.status === true) {
+          // since antd.message conflict with antd.Modal
+          // use setTimeout to show message after modal is closed
+          setTimeout(() => message.info(res.msg), 1000);
+          setConfig({
+            created: false,
+          });
+        }
+      })
+      .finally(closeModal);
+  }
+
+  async function installApp() {
     // fields check
     const dpNameRegex = new RegExp(
       /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/
@@ -267,13 +294,15 @@ function Lab({ history }) {
       return;
     }
 
-    // create deployment
-    sendUserRequest("/createDeployment", {
+    // create deployment & service
+    sendUserRequest("/installApp", {
       DeploymentName: modalConfig.dpName,
       App: modalConfig.app,
+      Service: modalConfig.service,
+      Replicas: modalConfig.replicas,
+      Port: modalConfig.port,
     })
       .then((res) => {
-        console.log(res);
         if (res.status === true) {
           // since antd.message conflict with antd.Modal
           // use setTimeout to show message after modal is closed
@@ -284,10 +313,6 @@ function Lab({ history }) {
         }
       })
       .finally(closeModal);
-
-    // create service if necessary
-    if (modalConfig.service) {
-    }
   }
 }
 
