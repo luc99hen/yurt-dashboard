@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -14,22 +13,6 @@ func assertNoErr(err error, t testing.TB) {
 	t.Helper()
 	if err != nil {
 		t.Errorf(err.Error())
-	}
-}
-
-func assertErrCode(err error, errCode int, t testing.TB) {
-	t.Helper()
-
-	// unwrap to get the original err
-	err = errors.Unwrap(err)
-	statusErr, isStatus := err.(*kerrors.StatusError)
-	if err == nil {
-		t.Errorf("expect %d got nothing", errCode)
-		return
-	}
-
-	if !(isStatus && statusErr.ErrStatus.Code == int32(errCode)) {
-		t.Errorf("expect %d got others, err: %v", errCode, err.Error())
 	}
 }
 
@@ -46,6 +29,11 @@ func TestGetRaw(t *testing.T) {
 
 	t.Run("get nodepool", func(t *testing.T) {
 		_, err := GetRawNodepool(kubeConfig, "")
+		assertNoErr(err, t)
+	})
+
+	t.Run("get service", func(t *testing.T) {
+		_, err := GetRawService(kubeConfig, "default")
 		assertNoErr(err, t)
 	})
 
@@ -92,6 +80,50 @@ func TestWriteRaw(t *testing.T) {
 		err := CreateDeployment(kubeConfig, "18321778186", demoDeployment)
 		assertNoErr(err, t)
 	})
+
+	t.Run("delete deployment", func(t *testing.T) {
+		err := DeleteDeployment(kubeConfig, "18321778186", "demo-deployment")
+		assertNoErr(err, t)
+	})
+
+	t.Run("delete not exist deployment", func(t *testing.T) {
+		err := DeleteDeployment(kubeConfig, "18321778186", "demo-deployment-nonexist")
+		if !kerrors.IsNotFound(err) {
+			t.Errorf("expect not found error got others, err: %v", err.Error())
+		}
+	})
+
+	t.Run("create service", func(t *testing.T) {
+
+		demoService := &apiv1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "demo-service",
+				Namespace: "18321778186",
+				Labels: map[string]string{
+					"app": "demo",
+				},
+			},
+			Spec: apiv1.ServiceSpec{
+				Ports: []apiv1.ServicePort{{
+					Name:     "http",
+					Port:     8080,
+					NodePort: 30080,
+				}},
+				Selector: map[string]string{
+					"app": "demo",
+				},
+				Type: apiv1.ServiceTypeNodePort,
+			},
+		}
+		err := CreateService(kubeConfig, "18321778186", demoService)
+		assertNoErr(err, t)
+
+	})
+
+	t.Run("delete service", func(t *testing.T) {
+		err := DeleteService(kubeConfig, "18321778186", "demo-service")
+		assertNoErr(err, t)
+	})
 }
 
 func TestGetOverview(t *testing.T) {
@@ -120,18 +152,33 @@ func TestUser(t *testing.T) {
 			Organization: "Tongji",
 		})
 
-		assertErrCode(err, 422, t)
+		if !kerrors.IsInvalid(err) {
+			t.Errorf("expect invalid error got others, err: %v", err.Error())
+		}
 	})
 
 	t.Run("post existing user", func(t *testing.T) {
 
 		err := CreateUser(kubeConfig, &UserSpec{
 			Email:        "132@qq.com",
-			Mobilephone:  "1",
+			Mobilephone:  "18321778186",
 			Organization: "openyurt",
 		})
 
-		assertErrCode(err, 409, t)
+		if !kerrors.IsAlreadyExists(err) {
+			t.Errorf("expect already exist error got others, err: %v", err.Error())
+		}
+	})
+
+	t.Run("post regular user", func(t *testing.T) {
+
+		err := CreateUser(kubeConfig, &UserSpec{
+			Email:        "132@qq.com",
+			Mobilephone:  "18321778185",
+			Organization: "openyurt",
+		})
+
+		assertNoErr(err, t)
 	})
 
 	t.Run("get user", func(t *testing.T) {
@@ -141,6 +188,13 @@ func TestUser(t *testing.T) {
 
 	t.Run("get non-exist user", func(t *testing.T) {
 		_, err := GetUser(kubeConfig, "non")
-		assertErrCode(err, 404, t)
+		if !kerrors.IsNotFound(err) {
+			t.Errorf("expect not found error got others, err: %v", err.Error())
+		}
+	})
+
+	t.Run("delete user", func(t *testing.T) {
+		err := DeleteUser(kubeConfig, "user-18321778185")
+		assertNoErr(err, t)
 	})
 }

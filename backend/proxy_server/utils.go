@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,7 @@ func parseResourceParas(c *gin.Context) (kubeConfig, namespace string, err error
 
 	// request body format not allowed
 	if err := c.BindJSON(requestParas); err != nil {
-		return "", "", fmt.Errorf("parse Paras Error")
+		return "", "", fmt.Errorf("parse Paras Error: %w", err)
 	}
 
 	return requestParas.KubeConfig, requestParas.Namespace, nil
@@ -27,6 +28,7 @@ func proxyRequest(c *gin.Context, fn K8sRequest) {
 	kubeConfig, namespace, err := parseResourceParas(c)
 	if err != nil {
 		JSONErr(c, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	// use k8s apiserver's raw resp body as proxy server resp body
@@ -55,3 +57,7 @@ func JSONSuccess(c *gin.Context, msg string) {
 }
 
 func int32Ptr(i int32) *int32 { return &i }
+
+func getAppServiceName(appName string) string {
+	return fmt.Sprintf("%s-service", strings.ToLower(appName))
+}

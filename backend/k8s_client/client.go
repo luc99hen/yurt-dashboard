@@ -11,6 +11,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 )
@@ -26,6 +28,7 @@ type RawReader interface {
 
 type RawWriter interface {
 	CreateRaw(namespace string, body interface{}) error
+	DeleteRaw(namespace, name string) error
 }
 
 type ResourceStatus struct {
@@ -87,6 +90,20 @@ func (c *baseClient) CreateRaw(namespace string, obj interface{}) error {
 		Resource(c.resourceName).
 		Body(obj).
 		DoRaw(context.TODO())
+	return err
+}
+
+// delete obj resource in k8s
+func (c *baseClient) DeleteRaw(namespace, name string) error {
+	req := c.client.Delete()
+	if namespace != "" {
+		req = req.Namespace(namespace)
+	}
+
+	_, err := req.Resource(c.resourceName).
+		Name(name).
+		DoRaw(context.TODO())
+
 	return err
 }
 
@@ -170,6 +187,21 @@ func (c *DeploymentClient) GetStatus(namespace string) (*ResourceStatus, error) 
 	return getDeploymentStatus(c.client, namespace)
 }
 
+// get deployment list
+func (c *DeploymentClient) Get(namespace string) (*appsv1.DeploymentList, error) {
+	// get deployments into list
+	dpList := &appsv1.DeploymentList{}
+	err := doGetReq(c.client, namespace, DeploymentConfig.ResourceName).
+		Do(context.TODO()).
+		Into(dpList)
+
+	if err != nil {
+		return nil, fmt.Errorf("request deployments fail: %v", err)
+	}
+
+	return dpList, nil
+}
+
 type StatefulsetClient struct {
 	baseClient
 }
@@ -192,4 +224,27 @@ func (c *JobClient) InitClient(kubeConfig string) (err error) {
 
 func (c *JobClient) GetStatus(namespace string) (*ResourceStatus, error) {
 	return getJobStatus(c.client, namespace)
+}
+
+type ServiceClient struct {
+	baseClient
+}
+
+func (c *ServiceClient) InitClient(kubeConfig string) (err error) {
+	return c.baseClient.InitClient(kubeConfig, &ServiceConfig)
+}
+
+// get service list
+func (c *ServiceClient) Get(namespace string) (*corev1.ServiceList, error) {
+	// get deployments into list
+	svcList := &corev1.ServiceList{}
+	err := doGetReq(c.client, namespace, ServiceConfig.ResourceName).
+		Do(context.TODO()).
+		Into(svcList)
+
+	if err != nil {
+		return nil, fmt.Errorf("request service fail: %v", err)
+	}
+
+	return svcList, nil
 }
