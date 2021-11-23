@@ -45,7 +45,7 @@ export function IntroBlock() {
           Extending Kubernetes to Edge
           <a
             style={{ display: "block", fontSize: 21 }}
-            href="https://openyurt.io/zh-cn/"
+            href="https://openyurt.io"
           >
             Learn More About OpenYurt &gt;
           </a>
