@@ -104,9 +104,9 @@ func getPodStatus(client *rest.RESTClient, namespace string) (status *ResourceSt
 	}
 
 	for _, pod := range podList.Items {
-		// "Pending", "Running", "Succeeded" -> healthy
-		// "Failed", "Unknown" -> unhealthy
-		if pod.Status.Phase != "Failed" && pod.Status.Phase != "Unknown" {
+		// "Running", "Succeeded" -> healthy
+		// "Pending", "Failed", "Unknown" -> unhealthy
+		if pod.Status.Phase == "Running" || pod.Status.Phase == "Succeeded" {
 			status.HealthyNum += 1
 		}
 	}
