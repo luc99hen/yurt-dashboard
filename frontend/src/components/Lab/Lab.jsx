@@ -92,6 +92,7 @@ function updateConfigList(oldConfigList, appList) {
       ...app.Deployment.metadata.labels,
       created: true,
       dpName: app.Deployment.metadata.name,
+      replicas: app.Deployment.spec.replicas,
       service: app.Service !== null,
     }));
 

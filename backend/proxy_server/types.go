@@ -7,6 +7,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type User struct {
@@ -150,7 +151,7 @@ func getRsshubDeploymentConfig(name, namespace string, replicas int) interface{}
 							Image: "diygod/rsshub",
 							Ports: []apiv1.ContainerPort{
 								{
-									ContainerPort: 80,
+									ContainerPort: 1200,
 								},
 							},
 						},
@@ -162,6 +163,13 @@ func getRsshubDeploymentConfig(name, namespace string, replicas int) interface{}
 }
 
 func getServiceConfig(appName, namespace string, port int) interface{} {
+
+	var targetPort = 80
+
+	if appName == "RSSHub" {
+		targetPort = 1200
+	}
+
 	return &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      getAppServiceName(appName),
@@ -173,8 +181,12 @@ func getServiceConfig(appName, namespace string, port int) interface{} {
 		},
 		Spec: apiv1.ServiceSpec{
 			Ports: []apiv1.ServicePort{{
-				Name:     "http",
-				Port:     80,
+				Name: "http",
+				Port: 80,
+				TargetPort: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: int32(targetPort),
+				},
 				NodePort: int32(port),
 			}},
 			Selector: map[string]string{

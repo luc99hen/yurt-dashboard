@@ -175,12 +175,14 @@ func getAppHandler(c *gin.Context) {
 		for _, dp := range dpList.Items {
 			if dp.Labels["app"] == app.App && dp.Labels["type"] == "lab" {
 				app.Deployment = &dp
+				break
 			}
 		}
 		// find if its corresponding service exist
 		for _, svc := range svcList.Items {
 			if svc.Labels["app"] == app.App && svc.Labels["type"] == "lab" {
 				app.Service = &svc
+				break
 			}
 		}
 	}
@@ -229,6 +231,7 @@ func installAppHandler(c *gin.Context) {
 		err = client.CreateService(requestParas.KubeConfig, requestParas.Namespace, service)
 		if err != nil {
 			JSONErr(c, http.StatusServiceUnavailable, err.Error())
+			client.DeleteDeployment(requestParas.KubeConfig, requestParas.Namespace, requestParas.DeploymentName)
 			return
 		}
 	}
