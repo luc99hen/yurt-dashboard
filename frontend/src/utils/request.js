@@ -82,9 +82,7 @@ export function getNodes(paras) {
     const nodeRoleKey = "node-role.kubernetes.io/master";
     const getNodeCondition = (rawNode) =>
       rawNode.status.conditions
-        .filter((item) => item.status === "True")
-        .map((item) => item.type)
-        .join(",");
+        .filter((item) => item.type === "Ready")[0]
 
     return {
       ...transformObject(rawNode, i),

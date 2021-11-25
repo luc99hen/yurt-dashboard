@@ -1,6 +1,6 @@
 YurtConsole is the web console for OpenYurt Novice Trial Platform.
 
-> Notice: This repo can not run directly on your computer, because we have excluded some secret files from git.
+> Notice: The backend server can not run directly on your computer, because we have excluded some secret files from git.
 
 ```
 |- backend              // Golang backend

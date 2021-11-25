@@ -47,12 +47,17 @@ export default function Nodes() {
     {
       title: "角色/状态",
       dataIndex: "role",
-      render: (node) => (
-        <div>
-          {node.role}
-          <Status status={node.condition} />
-        </div>
-      ),
+      render: (node) => {
+        return (
+          <div>
+            {node.role}
+            <Status
+              status={node.condition.status === "True" ? "Ready" : "Unready"}
+              tips={node.condition.message}
+            />
+          </div>
+        );
+      },
     },
     {
       title: "节点配置",

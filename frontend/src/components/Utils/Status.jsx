@@ -1,3 +1,6 @@
+import { Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
 const colorState = {
   success: "#62CB35",
   ready: "#62CB35",
@@ -8,18 +11,29 @@ const colorState = {
   on: "#62CB35",
 };
 
-export function Status({ status }) {
+export function Status({ status, tips }) {
   let statusKey = status && status.toLowerCase();
   return (
     <div>
-      <span
+      <div
         className="cluster-status"
         style={{
           backgroundColor:
             statusKey in colorState ? colorState[statusKey] : colorState.fail,
         }}
-      ></span>
-      {status}
+      ></div>
+
+      <Tooltip title={tips}>
+        <div
+          style={{
+            display: "inline-block",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span> {status} </span>
+          {tips ? <InfoCircleOutlined /> : null}
+        </div>
+      </Tooltip>
     </div>
   );
 }
