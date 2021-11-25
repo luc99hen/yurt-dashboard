@@ -1,4 +1,4 @@
-import { baseURL, userProfile as adminUserProfile, debugAsAdmin } from "../config";
+import { baseURL } from "../config";
 import { message } from "antd";
 import { toPercentagePresentation, formatTime, getUserProfile } from "./utils";
 
@@ -21,15 +21,12 @@ export function sendRequest(path, data) {
 }
 
 // send request as a use (add user token in request body)
-export function sendUserRequest(path, data, useAdmin = debugAsAdmin) {
+export function sendUserRequest(path, data) {
   let userProfile = getUserProfile();
   if (!userProfile) {
     // if userProfile is empty, redirect to login page
     window.location.replace("/login");
   }
-
-  if (useAdmin)
-    userProfile = adminUserProfile;
 
   return sendRequest(path, { ...data, ...userProfile.spec })
     .catch((err) => {

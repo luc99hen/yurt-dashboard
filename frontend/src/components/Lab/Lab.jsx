@@ -5,7 +5,6 @@ import { RightOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { getNodes, sendUserRequest } from "../../utils/request";
 import { withRouter } from "react-router";
-import { debugAsAdmin } from "../../config";
 
 const appInfo = {
   RSSHub: {
@@ -290,7 +289,7 @@ function Lab({ history }) {
     }
 
     const nodeList = await getNodes();
-    if (!debugAsAdmin && nodeList.length === 0) {
+    if (nodeList.length === 0) {
       setTip("Tips: 请您先至少接入一个节点， 然后再尝试实验室功能😄。");
       return;
     }
